@@ -1,0 +1,4 @@
+ROADMAP.md
+/vendor/
+/.phpunit.cache/
+/.phpunit.result.cache
