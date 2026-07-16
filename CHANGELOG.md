@@ -2,6 +2,24 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.5.0 - Phase 2 polish
+
+### Added
+- Report edit form reorganized into tabs (`CTabView`: General / Scope / Default period), matching how native Zabbix forms (e.g. host edit) organize multi-section forms instead of one long flat form.
+- `Hosts` multiselect alongside `Host groups` in both the builder and the ad-hoc filters, matching the Host groups + Hosts convention used elsewhere in core (e.g. Top 100 triggers).
+- Saved report definitions now store a default **period** (`config.period`), editable with quick-range presets (Yesterday, Last 7 days, Last 30 days, Last 3 months, Last year) or free-form relative/absolute expressions (`now-7d`, exact dates), reusing Zabbix's own `CRangeTimeParser` instead of a home-grown absolute-only date range.
+- The percentiles/availability run pages gained the same quick-range presets and now accept relative expressions in their From/To filter fields.
+
+### Changed
+- Item/trigger scope resolution (`ItemPercentilesReport`, `AvailabilityReport`) now also filters by `hostids`, not just `groupids`+pattern.
+
+## 0.4.0 - Phase 2 (status & filters)
+
+### Added
+- `status` (Enabled/Disabled) on saved report definitions, with a one-click toggle from the list (`morereporting.report.status`) and a lazy schema migration (`ALTER TABLE ... ADD COLUMN status`) for installations created before this existed.
+- List page filter: name search, report type, status (Any/Enabled/Disabled), and "Created by me" vs "All" - persisted via `CProfile` like native list pages.
+- "Created by" column resolving the definition's owner via `API::User()->get()` + `getUserFullname()`.
+
 ## 0.3.0 - Phase 2
 
 ### Added

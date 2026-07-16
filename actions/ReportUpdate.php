@@ -6,6 +6,8 @@ use CController;
 use CControllerResponseFatal;
 use CControllerResponseRedirect;
 use CMessageHelper;
+use CParser;
+use CRangeTimeParser;
 use CUrl;
 use CWebUser;
 
@@ -20,8 +22,12 @@ class ReportUpdate extends CController {
 			'name' =>			'required|string|not_empty',
 			'report_type' =>	'required|string|not_empty',
 			'groupids' =>		'array_db hosts_groups.groupid',
+			'hostids' =>		'array_db hosts.hostid',
 			'pattern' =>		'string',
-			'slo' =>			'string'
+			'slo' =>			'string',
+			'period_from' =>	'required|string|not_empty',
+			'period_to' =>		'required|string|not_empty',
+			'status_enabled' =>	'in 1'
 		];
 
 		$ret = $this->validateInput($fields);
@@ -29,6 +35,17 @@ class ReportUpdate extends CController {
 		if ($ret && !ReportTypeRegistry::exists($this->getInput('report_type'))) {
 			error(_('Unknown report type.'));
 			$ret = false;
+		}
+
+		if ($ret) {
+			$range_time_parser = new CRangeTimeParser();
+
+			foreach (['period_from', 'period_to'] as $field) {
+				if ($range_time_parser->parse($this->getInput($field)) !== CParser::PARSE_SUCCESS) {
+					error(_s('Incorrect value for field "%1$s".', $field));
+					$ret = false;
+				}
+			}
 		}
 
 		if (!$ret) {
@@ -45,19 +62,25 @@ class ReportUpdate extends CController {
 	protected function doAction(): void {
 		$config = [
 			'groupids' => $this->getInput('groupids', []),
+			'hostids' => $this->getInput('hostids', []),
 			'pattern' => $this->getInput('pattern', ''),
-			'slo' => $this->getInput('slo', '99.9')
+			'slo' => $this->getInput('slo', '99.9'),
+			'period' => [
+				'from' => $this->getInput('period_from'),
+				'to' => $this->getInput('period_to')
+			]
 		];
 
 		$name = $this->getInput('name');
 		$report_type = $this->getInput('report_type');
+		$status = $this->hasInput('status_enabled') ? ZBX_REPORT_STATUS_ENABLED : ZBX_REPORT_STATUS_DISABLED;
 
 		if ($this->hasInput('reportid')) {
-			ReportStorage::update((int) $this->getInput('reportid'), $name, $report_type, $config);
+			ReportStorage::update((int) $this->getInput('reportid'), $name, $report_type, $config, $status);
 			CMessageHelper::setSuccessTitle(_('Report updated'));
 		}
 		else {
-			ReportStorage::create($name, $report_type, $config, (int) CWebUser::$data['userid']);
+			ReportStorage::create($name, $report_type, $config, $status, (int) CWebUser::$data['userid']);
 			CMessageHelper::setSuccessTitle(_('Report created'));
 		}
 

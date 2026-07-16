@@ -20,6 +20,7 @@ class AvailabilityReport extends ReportType {
 			'output' => ['triggerid', 'description', 'priority'],
 			'selectHosts' => ['hostid', 'name'],
 			'groupids' => $filter['groupids'] ?: null,
+			'hostids' => $filter['hostids'] ?: null,
 			'search' => $filter['pattern'] !== '' ? ['description' => $filter['pattern']] : null,
 			'monitored' => true,
 			'sortfield' => 'description',

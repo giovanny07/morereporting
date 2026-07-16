@@ -10,6 +10,7 @@ use CControllerResponseFatal;
 
 use Modules\MoreReporting\Includes\ReportStorage;
 use Modules\MoreReporting\Includes\ReportTypeRegistry;
+use Modules\MoreReporting\Includes\TimePresets;
 
 class ReportEdit extends CController {
 
@@ -50,6 +51,7 @@ class ReportEdit extends CController {
 		$config = $definition['config'] ?? [];
 
 		$groupids = $config['groupids'] ?? [];
+		$hostids = $config['hostids'] ?? [];
 
 		$groups = $groupids
 			? CArrayHelper::renameObjectsKeys(API::HostGroup()->get([
@@ -58,15 +60,28 @@ class ReportEdit extends CController {
 			]), ['groupid' => 'id'])
 			: [];
 
+		$hosts = $hostids
+			? CArrayHelper::renameObjectsKeys(API::Host()->get([
+				'output' => ['hostid', 'name'],
+				'hostids' => $hostids
+			]), ['hostid' => 'id'])
+			: [];
+
 		$data = [
 			'reportid' => $definition['reportid'] ?? null,
 			'name' => $definition['name'] ?? '',
 			'report_type' => $definition['report_type'] ?? ReportTypeRegistry::PERCENTILES,
 			'groupids' => $groupids,
 			'groups' => $groups,
+			'hostids' => $hostids,
+			'hosts' => $hosts,
 			'pattern' => $config['pattern'] ?? '',
 			'slo' => $config['slo'] ?? '99.9',
-			'report_type_labels' => ReportTypeRegistry::labels()
+			'period_from' => $config['period']['from'] ?? 'now-7d',
+			'period_to' => $config['period']['to'] ?? 'now',
+			'status' => $definition['status'] ?? ZBX_REPORT_STATUS_ENABLED,
+			'report_type_labels' => ReportTypeRegistry::labels(),
+			'time_presets' => TimePresets::all()
 		];
 
 		$response = new CControllerResponseData($data);

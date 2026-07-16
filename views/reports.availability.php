@@ -5,8 +5,6 @@
  * @var array $data
  */
 
-$this->addJsFile('class.calendar.js');
-
 $scope_fields = $data['definition'] !== null ? [] : [
 	(new CFormGrid())
 		->addClass(CFormGrid::ZBX_STYLE_FORM_GRID_LABEL_WIDTH_TRUE)
@@ -31,6 +29,24 @@ $scope_fields = $data['definition'] !== null ? [] : [
 			)
 		])
 		->addItem([
+			new CLabel(_('Hosts'), 'filter_hostids__ms'),
+			new CFormField(
+				(new CMultiSelect([
+					'name' => 'filter_hostids[]',
+					'object_name' => 'hosts',
+					'data' => $data['hosts'],
+					'popup' => [
+						'parameters' => [
+							'srctbl' => 'hosts',
+							'srcfld1' => 'hostid',
+							'dstfrm' => 'zbx_filter',
+							'dstfld1' => 'filter_hostids_'
+						]
+					]
+				]))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)
+			)
+		])
+		->addItem([
 			new CLabel(_('Trigger name contains'), 'filter_pattern'),
 			new CFormField(
 				(new CTextBox('filter_pattern', $data['filter']['pattern']))
@@ -46,6 +62,20 @@ $scope_fields = $data['definition'] !== null ? [] : [
 		])
 ];
 
+$period_presets = new CList();
+
+foreach ($data['time_presets'] as $label => $range) {
+	$period_presets->addItem(
+		(new CLink($label, '#'))
+			->addClass(ZBX_STYLE_BTN_LINK)
+			->setAttribute('onclick',
+				'document.getElementsByName("filter_date_from")[0].value='.json_encode($range[0]).';'.
+				'document.getElementsByName("filter_date_to")[0].value='.json_encode($range[1]).';'.
+				'return false;'
+			)
+	);
+}
+
 $filter = (new CFilter())
 	->addVar('action', 'morereporting.availability')
 	->setResetUrl((new CUrl('zabbix.php'))->setArgument('action', 'morereporting.availability'))
@@ -57,16 +87,18 @@ $filter = (new CFilter())
 			->addItem([
 				new CLabel(_('From'), 'filter_date_from'),
 				new CFormField(
-					(new CDateSelector('filter_date_from', $data['filter']['date_from']))
-						->setDateFormat(ZBX_DATE_TIME)
-						->setPlaceholder(_('YYYY-MM-DD hh:mm'))
+					(new CTextBox('filter_date_from', $data['filter']['date_from']))
+						->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)
+						->setAttribute('placeholder', _('YYYY-MM-DD hh:mm or now-7d'))
 				),
 				new CLabel(_('To'), 'filter_date_to'),
 				new CFormField(
-					(new CDateSelector('filter_date_to', $data['filter']['date_to']))
-						->setDateFormat(ZBX_DATE_TIME)
-						->setPlaceholder(_('YYYY-MM-DD hh:mm'))
-				)
+					(new CTextBox('filter_date_to', $data['filter']['date_to']))
+						->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)
+						->setAttribute('placeholder', _('YYYY-MM-DD hh:mm or now'))
+				),
+				new CLabel(_('Quick ranges')),
+				new CFormField($period_presets)
 			])
 	]));
 
