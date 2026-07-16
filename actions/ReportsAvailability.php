@@ -12,6 +12,7 @@ use CProfile;
 use CTimezoneHelper;
 use DateTimeZone;
 
+use Modules\MoreReporting\Includes\ReportStorage;
 use Modules\MoreReporting\Includes\Reports\AvailabilityReport;
 
 class ReportsAvailability extends CController {
@@ -24,6 +25,7 @@ class ReportsAvailability extends CController {
 
 	protected function checkInput(): bool {
 		$fields = [
+			'reportid' =>			'id',
 			'filter_groupids' =>	'array_db hosts_groups.groupid',
 			'filter_pattern' =>	'string',
 			'filter_slo' =>			'string',
@@ -47,6 +49,8 @@ class ReportsAvailability extends CController {
 	}
 
 	protected function doAction(): void {
+		$definition = $this->hasInput('reportid') ? ReportStorage::get((int) $this->getInput('reportid')) : null;
+
 		if ($this->hasInput('filter_set')) {
 			CProfile::updateArray(self::PROFILE_PREFIX.'groupids', $this->getInput('filter_groupids', []),
 				PROFILE_TYPE_ID
@@ -66,13 +70,21 @@ class ReportsAvailability extends CController {
 			CProfile::delete(self::PROFILE_PREFIX.'date_to');
 		}
 
-		$filter = [
-			'groupids' => CProfile::getArray(self::PROFILE_PREFIX.'groupids', []),
-			'pattern' => CProfile::get(self::PROFILE_PREFIX.'pattern', ''),
-			'slo' => CProfile::get(self::PROFILE_PREFIX.'slo', '99.9'),
-			'date_from' => CProfile::get(self::PROFILE_PREFIX.'date_from', date(ZBX_DATE_TIME, time() - SEC_PER_DAY)),
-			'date_to' => CProfile::get(self::PROFILE_PREFIX.'date_to', date(ZBX_DATE_TIME, time()))
-		];
+		$filter = $definition !== null
+			? [
+				'groupids' => $definition['config']['groupids'] ?? [],
+				'pattern' => $definition['config']['pattern'] ?? '',
+				'slo' => $definition['config']['slo'] ?? '99.9',
+				'date_from' => CProfile::get(self::PROFILE_PREFIX.'date_from', date(ZBX_DATE_TIME, time() - SEC_PER_DAY)),
+				'date_to' => CProfile::get(self::PROFILE_PREFIX.'date_to', date(ZBX_DATE_TIME, time()))
+			]
+			: [
+				'groupids' => CProfile::getArray(self::PROFILE_PREFIX.'groupids', []),
+				'pattern' => CProfile::get(self::PROFILE_PREFIX.'pattern', ''),
+				'slo' => CProfile::get(self::PROFILE_PREFIX.'slo', '99.9'),
+				'date_from' => CProfile::get(self::PROFILE_PREFIX.'date_from', date(ZBX_DATE_TIME, time() - SEC_PER_DAY)),
+				'date_to' => CProfile::get(self::PROFILE_PREFIX.'date_to', date(ZBX_DATE_TIME, time()))
+			];
 
 		$timezone = new DateTimeZone(CTimezoneHelper::getSystemTimezone());
 		$time_parser = new CAbsoluteTimeParser();
@@ -106,7 +118,10 @@ class ReportsAvailability extends CController {
 			'groups' => $groups,
 			'active_tab' => CProfile::get(self::PROFILE_PREFIX.'active', 1),
 			'slo' => (float) $filter['slo'],
-			'rows' => $rows
+			'rows' => $rows,
+			'definition' => $definition !== null
+				? ['reportid' => $definition['reportid'], 'name' => $definition['name']]
+				: null
 		];
 
 		$response = new CControllerResponseData($data);

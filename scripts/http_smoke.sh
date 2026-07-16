@@ -71,6 +71,7 @@ log_in
 check_action "morereporting.list"
 check_action "morereporting.percentiles"
 check_action "morereporting.availability"
+check_action "morereporting.report.edit"
 
 if [[ "$fail_count" -gt 0 ]]; then
 	echo "$fail_count check(s) failed"

@@ -13,6 +13,7 @@ use CTimezoneHelper;
 use DateTimeZone;
 
 use Modules\MoreReporting\Includes\NativeGraph;
+use Modules\MoreReporting\Includes\ReportStorage;
 use Modules\MoreReporting\Includes\Reports\ItemPercentilesReport;
 
 class ReportsPercentiles extends CController {
@@ -25,6 +26,7 @@ class ReportsPercentiles extends CController {
 
 	protected function checkInput(): bool {
 		$fields = [
+			'reportid' =>			'id',
 			'filter_groupids' =>	'array_db hosts_groups.groupid',
 			'filter_pattern' =>	'string',
 			'filter_date_from' =>	'string',
@@ -47,6 +49,8 @@ class ReportsPercentiles extends CController {
 	}
 
 	protected function doAction(): void {
+		$definition = $this->hasInput('reportid') ? ReportStorage::get((int) $this->getInput('reportid')) : null;
+
 		if ($this->hasInput('filter_set')) {
 			CProfile::updateArray(self::PROFILE_PREFIX.'groupids', $this->getInput('filter_groupids', []),
 				PROFILE_TYPE_ID
@@ -64,12 +68,19 @@ class ReportsPercentiles extends CController {
 			CProfile::delete(self::PROFILE_PREFIX.'date_to');
 		}
 
-		$filter = [
-			'groupids' => CProfile::getArray(self::PROFILE_PREFIX.'groupids', []),
-			'pattern' => CProfile::get(self::PROFILE_PREFIX.'pattern', ''),
-			'date_from' => CProfile::get(self::PROFILE_PREFIX.'date_from', date(ZBX_DATE_TIME, time() - SEC_PER_DAY)),
-			'date_to' => CProfile::get(self::PROFILE_PREFIX.'date_to', date(ZBX_DATE_TIME, time()))
-		];
+		$filter = $definition !== null
+			? [
+				'groupids' => $definition['config']['groupids'] ?? [],
+				'pattern' => $definition['config']['pattern'] ?? '',
+				'date_from' => CProfile::get(self::PROFILE_PREFIX.'date_from', date(ZBX_DATE_TIME, time() - SEC_PER_DAY)),
+				'date_to' => CProfile::get(self::PROFILE_PREFIX.'date_to', date(ZBX_DATE_TIME, time()))
+			]
+			: [
+				'groupids' => CProfile::getArray(self::PROFILE_PREFIX.'groupids', []),
+				'pattern' => CProfile::get(self::PROFILE_PREFIX.'pattern', ''),
+				'date_from' => CProfile::get(self::PROFILE_PREFIX.'date_from', date(ZBX_DATE_TIME, time() - SEC_PER_DAY)),
+				'date_to' => CProfile::get(self::PROFILE_PREFIX.'date_to', date(ZBX_DATE_TIME, time()))
+			];
 
 		$timezone = new DateTimeZone(CTimezoneHelper::getSystemTimezone());
 		$time_parser = new CAbsoluteTimeParser();
@@ -110,7 +121,10 @@ class ReportsPercentiles extends CController {
 			'groups' => $groups,
 			'active_tab' => CProfile::get(self::PROFILE_PREFIX.'active', 1),
 			'rows' => $rows,
-			'graph' => $graph
+			'graph' => $graph,
+			'definition' => $definition !== null
+				? ['reportid' => $definition['reportid'], 'name' => $definition['name']]
+				: null
 		];
 
 		$response = new CControllerResponseData($data);

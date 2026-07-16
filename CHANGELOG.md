@@ -2,7 +2,18 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
-## 0.2.0 - Phase 1 (in progress)
+## 0.3.0 - Phase 2
+
+### Added
+- Report builder: save a report definition (name, type, host groups, item/trigger name pattern, SLO where applicable) and reuse/schedule it later instead of re-filtering every time.
+  - `morereporting.report.edit` / `morereporting.report.update` / `morereporting.report.delete`: create, edit and delete saved definitions.
+  - `includes/ReportStorage.php`: persistence for definitions in a new `morereporting_report` table, installed lazily on first use (no separate bootstrap step). MySQL only for now.
+  - `includes/ReportTypeRegistry.php`: maps a saved definition's `report_type` to the action that runs it, so new report types register themselves without touching the builder.
+  - Saved definitions are shared across all users with module access (matches native Scheduled reports); the data each user sees when running one still respects their own host group permissions.
+  - `morereporting.percentiles` and `morereporting.availability` now accept a `reportid` to run from a saved definition (scope locked, date range still adjustable), alongside their original ad-hoc filter mode.
+- Catalog page (`morereporting.list`) now lists saved report definitions with Run/Edit/Delete actions and a "Create report" button.
+
+## 0.2.0 - Phase 1
 
 ### Added
 - `Item percentiles` report (`morereporting.percentiles`): p50/p90/p95/p99 over raw history values for numeric items, filterable by host group and item name pattern, with a native SVG trend graph (p95 overlay) rendered through Zabbix's own `Widgets\SvgGraph` engine.
