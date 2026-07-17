@@ -133,6 +133,52 @@ check_json_export() {
 	rm -f "$body" "$headers"
 }
 
+# Same idea as check_json_export, for CSV (zbx_toCSV() output: "a","b","c" per line).
+check_csv_export() {
+	local action="$1"
+	local body headers status
+
+	body="$(mktemp)"
+	headers="$(mktemp)"
+
+	status=$(curl -s -D "$headers" -o "$body" -w '%{http_code}' -b "$COOKIE_JAR" \
+		"$ZABBIX_URL/zabbix.php?action=$action&filter_date_from=now-30d&filter_date_to=now")
+
+	if [[ "$status" != "200" ]]; then
+		echo "FAIL $action: HTTP $status"
+		fail_count=$((fail_count + 1))
+		rm -f "$body" "$headers"
+		return
+	fi
+
+	if ! grep -qi 'content-type: text/csv' "$headers"; then
+		echo "FAIL $action: missing/wrong Content-Type header"
+		fail_count=$((fail_count + 1))
+		rm -f "$body" "$headers"
+		return
+	fi
+
+	if ! grep -qi 'content-disposition: attachment' "$headers"; then
+		echo "FAIL $action: missing Content-Disposition: attachment header (not downloading as a file)"
+		fail_count=$((fail_count + 1))
+		rm -f "$body" "$headers"
+		return
+	fi
+
+	local line_count
+	line_count=$(grep -c '^"' "$body" || true)
+
+	if [[ "$line_count" -lt 1 ]]; then
+		echo "FAIL $action: response body doesn't look like quoted CSV rows"
+		fail_count=$((fail_count + 1))
+		rm -f "$body" "$headers"
+		return
+	fi
+
+	echo "OK $action ($line_count lines, valid CSV, attachment headers correct)"
+	rm -f "$body" "$headers"
+}
+
 # Row count in a popup.generic response body, or -1 on a validation/PHP error.
 popup_rows() {
 	local body
@@ -224,6 +270,8 @@ check_action "morereporting.availability"
 check_action "morereporting.report.edit"
 check_json_export "morereporting.percentiles.json"
 check_json_export "morereporting.availability.json"
+check_csv_export "morereporting.percentiles.csv"
+check_csv_export "morereporting.availability.csv"
 
 # Host groups -> Hosts (popup.generic, submit_as: groupid, no "multiple" - see 0.6.2).
 # Not host_preselect_required, so it shows everything unscoped and narrows once scoped.

@@ -146,7 +146,9 @@ class ReportsAvailability extends CController {
 
 		$rows = $report->render($report->compute($raw_data), 'interactive');
 
-		$is_export = $this->getAction() === 'morereporting.availability.json';
+		$export_formats = ['morereporting.availability.json' => 'json', 'morereporting.availability.csv' => 'csv'];
+		$export_format = $export_formats[$this->getAction()] ?? null;
+		$is_export = $export_format !== null;
 
 		$compare_pairs = null;
 
@@ -184,7 +186,7 @@ class ReportsAvailability extends CController {
 		$response->setTitle(_('Trigger availability'));
 
 		if ($is_export) {
-			$response->setFileName('morereporting_availability_'.date('Ymd_His').'.json');
+			$response->setFileName('morereporting_availability_'.date('Ymd_His').'.'.$export_format);
 		}
 
 		$this->setResponse($response);

@@ -147,22 +147,24 @@ $title = $data['definition'] !== null ? $data['definition']['name'] : _('Trigger
 
 $html_page = (new CHtmlPage())->setTitle($title);
 
-$export_url = (new CUrl('zabbix.php'))
-	->setArgument('action', 'morereporting.availability.json')
-	->setArgument('filter_groupids', $data['filter']['groupids'])
-	->setArgument('filter_hostids', $data['filter']['hostids'])
-	->setArgument('filter_patterns', $data['filter']['patterns'])
-	->setArgument('filter_slo', $data['filter']['slo'])
-	->setArgument('filter_date_from', $data['filter']['date_from'])
-	->setArgument('filter_date_to', $data['filter']['date_to']);
-
-if ($data['definition'] !== null) {
-	$export_url->setArgument('reportid', $data['definition']['reportid']);
-}
-
 $controls = new CList();
 
-$controls->addItem(new CLink(_('Export JSON'), $export_url->getUrl()));
+foreach (['json' => _('Export JSON'), 'csv' => _('Export CSV')] as $format => $label) {
+	$export_url = (new CUrl('zabbix.php'))
+		->setArgument('action', 'morereporting.availability.'.$format)
+		->setArgument('filter_groupids', $data['filter']['groupids'])
+		->setArgument('filter_hostids', $data['filter']['hostids'])
+		->setArgument('filter_patterns', $data['filter']['patterns'])
+		->setArgument('filter_slo', $data['filter']['slo'])
+		->setArgument('filter_date_from', $data['filter']['date_from'])
+		->setArgument('filter_date_to', $data['filter']['date_to']);
+
+	if ($data['definition'] !== null) {
+		$export_url->setArgument('reportid', $data['definition']['reportid']);
+	}
+
+	$controls->addItem(new CLink($label, $export_url->getUrl()));
+}
 
 if ($data['definition'] !== null) {
 	$controls->addItem(

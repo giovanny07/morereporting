@@ -2,6 +2,13 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.11.0 - Phase 4.2: CSV export
+
+### Added
+- "Export CSV" link next to "Export JSON" on both report run pages, same filter carry-over. Human-readable formatting (severity name instead of raw int, durations via `convertUnitsS()`, "N/A" for zero-episode MTTR/MTBF) rather than the raw JSON export's unformatted values, since CSV/Excel is meant to be read directly, not re-parsed by another program.
+- Reuses core's own `layout.csv` and `zbx_toCSV()` (`include/func.inc.php`) - unlike JSON, no custom layout was needed since core's CSV layout already sets `Content-Disposition: attachment`.
+- `scripts/http_smoke.sh` gained a matching CSV export check (Content-Type, Content-Disposition, quoted-CSV-shaped body).
+
 ## 0.9.0 - Phase 4.1: JSON export
 
 ### Added

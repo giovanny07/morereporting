@@ -142,7 +142,9 @@ class ReportsPercentiles extends CController {
 
 		$rows = $report->render($report->compute($raw_data), 'interactive');
 
-		$is_export = $this->getAction() === 'morereporting.percentiles.json';
+		$export_formats = ['morereporting.percentiles.json' => 'json', 'morereporting.percentiles.csv' => 'csv'];
+		$export_format = $export_formats[$this->getAction()] ?? null;
+		$is_export = $export_format !== null;
 
 		$compare_pairs = null;
 
@@ -187,7 +189,7 @@ class ReportsPercentiles extends CController {
 		$response->setTitle(_('Item percentiles'));
 
 		if ($is_export) {
-			$response->setFileName('morereporting_percentiles_'.date('Ymd_His').'.json');
+			$response->setFileName('morereporting_percentiles_'.date('Ymd_His').'.'.$export_format);
 		}
 
 		$this->setResponse($response);
