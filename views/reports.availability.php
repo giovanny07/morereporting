@@ -131,7 +131,11 @@ $filter = (new CFilter())
 						->setAttribute('placeholder', _('YYYY-MM-DD hh:mm or now'))
 				),
 				new CLabel(_('Quick ranges')),
-				new CFormField($period_presets)
+				new CFormField($period_presets),
+				new CLabel(_('Compare with previous period'), 'filter_compare'),
+				new CFormField(
+					(new CCheckBox('filter_compare'))->setChecked($data['filter']['compare'])
+				)
 			])
 	]));
 
@@ -160,16 +164,24 @@ if ($data['definition'] !== null) {
 
 $html_page->addItem($filter);
 
-$table = (new CTableInfo())
-	->setHeader([
-		_('Host'), _('Trigger'), _('Severity'), _('Availability'), _('Downtime'), _('Episodes'), _('MTTR'), _('MTBF')
-	]);
+$is_comparing = $data['compare_pairs'] !== null;
 
-foreach ($data['rows'] as $row) {
+$header = [
+	_('Host'), _('Trigger'), _('Severity'), _('Availability'), _('Downtime'), _('Episodes'), _('MTTR'), _('MTBF')
+];
+
+if ($is_comparing) {
+	$header[] = _('Availability (previous period)');
+	$header[] = _('Δ');
+}
+
+$table = (new CTableInfo())->setHeader($header);
+
+foreach ($data['rows'] as $i => $row) {
 	$availability_tag = (new CSpan(round($row['availability'], 4).'%'))
 		->addClass($row['availability'] >= $data['slo'] ? ZBX_STYLE_GREEN : ZBX_STYLE_RED);
 
-	$table->addRow([
+	$cells = [
 		$row['host'],
 		$row['description'],
 		CSeverityHelper::makeSeverityCell($row['priority']),
@@ -178,7 +190,25 @@ foreach ($data['rows'] as $row) {
 		$row['episodes'],
 		$row['mttr_seconds'] !== null ? convertUnitsS($row['mttr_seconds'], true) : (new CSpan(_('N/A')))->addClass(ZBX_STYLE_GREY),
 		$row['mtbf_seconds'] !== null ? convertUnitsS($row['mtbf_seconds'], true) : (new CSpan(_('N/A')))->addClass(ZBX_STYLE_GREY)
-	]);
+	];
+
+	if ($is_comparing) {
+		$previous = $data['compare_pairs'][$i]['previous'];
+
+		if ($previous !== null) {
+			$delta = $row['availability'] - $previous['availability'];
+
+			$cells[] = round($previous['availability'], 4).'%';
+			$cells[] = (new CSpan(($delta >= 0 ? '+' : '').round($delta, 4).'%'))
+				->addClass($delta > 0 ? ZBX_STYLE_GREEN : ($delta < 0 ? ZBX_STYLE_RED : ZBX_STYLE_GREY));
+		}
+		else {
+			$cells[] = (new CSpan(_('No data')))->addClass(ZBX_STYLE_GREY);
+			$cells[] = '';
+		}
+	}
+
+	$table->addRow($cells);
 }
 
 $html_page

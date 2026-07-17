@@ -126,7 +126,11 @@ $filter = (new CFilter())
 						->setAttribute('placeholder', _('YYYY-MM-DD hh:mm or now'))
 				),
 				new CLabel(_('Quick ranges')),
-				new CFormField($period_presets)
+				new CFormField($period_presets),
+				new CLabel(_('Compare with previous period'), 'filter_compare'),
+				new CFormField(
+					(new CCheckBox('filter_compare'))->setChecked($data['filter']['compare'])
+				)
 			])
 	]));
 
@@ -161,11 +165,19 @@ if ($data['graph'] !== null) {
 	$html_page->addItem(new CDiv(new CObject($data['graph'])));
 }
 
-$table = (new CTableInfo())
-	->setHeader([_('Host'), _('Item'), _('Count'), _('Min'), _('Avg'), _('Max'), _('P50'), _('P90'), _('P95'), _('P99')]);
+$is_comparing = $data['compare_pairs'] !== null;
 
-foreach ($data['rows'] as $row) {
-	$table->addRow([
+$header = [_('Host'), _('Item'), _('Count'), _('Min'), _('Avg'), _('Max'), _('P50'), _('P90'), _('P95'), _('P99')];
+
+if ($is_comparing) {
+	$header[] = _('P95 (previous period)');
+	$header[] = _('P95 Δ');
+}
+
+$table = (new CTableInfo())->setHeader($header);
+
+foreach ($data['rows'] as $i => $row) {
+	$cells = [
 		$row['host'],
 		$row['name'],
 		$row['count'],
@@ -176,7 +188,25 @@ foreach ($data['rows'] as $row) {
 		round($row['p90'], 4),
 		(new CSpan(round($row['p95'], 4)))->addClass(ZBX_STYLE_ORANGE),
 		(new CSpan(round($row['p99'], 4)))->addClass(ZBX_STYLE_RED)
-	]);
+	];
+
+	if ($is_comparing) {
+		$previous = $data['compare_pairs'][$i]['previous'];
+
+		if ($previous !== null) {
+			$delta = $row['p95'] - $previous['p95'];
+
+			$cells[] = round($previous['p95'], 4);
+			$cells[] = (new CSpan(($delta >= 0 ? '+' : '').round($delta, 4)))
+				->addClass($delta > 0 ? ZBX_STYLE_RED : ($delta < 0 ? ZBX_STYLE_GREEN : ZBX_STYLE_GREY));
+		}
+		else {
+			$cells[] = (new CSpan(_('No data')))->addClass(ZBX_STYLE_GREY);
+			$cells[] = '';
+		}
+	}
+
+	$table->addRow($cells);
 }
 
 $html_page

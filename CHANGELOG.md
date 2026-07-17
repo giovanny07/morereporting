@@ -2,6 +2,13 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.8.0 - Phase 3: generic period-over-period comparison
+
+### Added
+- "Compare with previous period" checkbox on both report run pages (percentiles and availability). When checked, the report runs twice - the selected period and the immediately preceding period of equal length (e.g. last 7 days vs the 7 days before that) - and shows the headline metric (P95 for percentiles, Availability % for availability) from both periods side by side with a colored delta (green/red/grey).
+- `includes/ReportComparison.php`: generic pairing helper (`pair()` matches two result sets by key field like `itemid`/`triggerid`; `previousPeriod()` computes the preceding equal-length window) that any `ReportType` can reuse for this - not specific to one report. Covered by unit tests (pure logic, no framework dependency).
+- This closes Phase 3 (MVP gerencial) from the roadmap: availability %, MTTR/MTBF, and period-over-period comparison are all in place.
+
 ## 0.7.0 - Phase 3: MTTR/MTBF
 
 ### Added

@@ -13,6 +13,7 @@ use CTimezoneHelper;
 use DateTimeZone;
 
 use Modules\MoreReporting\Includes\NativeGraph;
+use Modules\MoreReporting\Includes\ReportComparison;
 use Modules\MoreReporting\Includes\ReportStorage;
 use Modules\MoreReporting\Includes\Reports\ItemPercentilesReport;
 use Modules\MoreReporting\Includes\TimePresets;
@@ -33,6 +34,7 @@ class ReportsPercentiles extends CController {
 			'filter_patterns' =>	'array',
 			'filter_date_from' =>	'string',
 			'filter_date_to' =>	'string',
+			'filter_compare' =>		'in 1',
 			'filter_set' =>			'in 1',
 			'filter_rst' =>			'in 1'
 		];
@@ -61,7 +63,8 @@ class ReportsPercentiles extends CController {
 				'hostids' => $config['hostids'] ?? [],
 				'patterns' => $config['patterns'] ?? [],
 				'date_from' => $this->getInput('filter_date_from', $config['period']['from'] ?? 'now-7d'),
-				'date_to' => $this->getInput('filter_date_to', $config['period']['to'] ?? 'now')
+				'date_to' => $this->getInput('filter_date_to', $config['period']['to'] ?? 'now'),
+				'compare' => $this->hasInput('filter_compare')
 			];
 		}
 		else {
@@ -81,6 +84,9 @@ class ReportsPercentiles extends CController {
 				CProfile::update(self::PROFILE_PREFIX.'date_to', $this->getInput('filter_date_to', ''),
 					PROFILE_TYPE_STR
 				);
+				CProfile::update(self::PROFILE_PREFIX.'compare', $this->hasInput('filter_compare') ? 1 : 0,
+					PROFILE_TYPE_INT
+				);
 			}
 			elseif ($this->hasInput('filter_rst')) {
 				CProfile::deleteIdx(self::PROFILE_PREFIX.'groupids');
@@ -88,6 +94,7 @@ class ReportsPercentiles extends CController {
 				CProfile::deleteIdx(self::PROFILE_PREFIX.'patterns');
 				CProfile::delete(self::PROFILE_PREFIX.'date_from');
 				CProfile::delete(self::PROFILE_PREFIX.'date_to');
+				CProfile::delete(self::PROFILE_PREFIX.'compare');
 			}
 
 			$filter = [
@@ -95,7 +102,8 @@ class ReportsPercentiles extends CController {
 				'hostids' => CProfile::getArray(self::PROFILE_PREFIX.'hostids', []),
 				'patterns' => CProfile::getArray(self::PROFILE_PREFIX.'patterns', []),
 				'date_from' => CProfile::get(self::PROFILE_PREFIX.'date_from', 'now-7d'),
-				'date_to' => CProfile::get(self::PROFILE_PREFIX.'date_to', 'now')
+				'date_to' => CProfile::get(self::PROFILE_PREFIX.'date_to', 'now'),
+				'compare' => (bool) CProfile::get(self::PROFILE_PREFIX.'compare', 0)
 			];
 		}
 
@@ -134,6 +142,24 @@ class ReportsPercentiles extends CController {
 
 		$rows = $report->render($report->compute($raw_data), 'interactive');
 
+		$compare_pairs = null;
+
+		if ($filter['compare']) {
+			$previous_period = ReportComparison::previousPeriod($time_from, $time_to);
+
+			$previous_raw_data = $report->getData([
+				'groupids' => $filter['groupids'],
+				'hostids' => $filter['hostids'],
+				'patterns' => $filter['patterns'],
+				'time_from' => $previous_period['from'],
+				'time_to' => $previous_period['to']
+			]);
+
+			$previous_rows = $report->render($report->compute($previous_raw_data), 'interactive');
+
+			$compare_pairs = ReportComparison::pair($rows, $previous_rows, 'itemid');
+		}
+
 		$graph = null;
 
 		if ($rows) {
@@ -147,6 +173,7 @@ class ReportsPercentiles extends CController {
 			'hosts' => $hosts,
 			'active_tab' => CProfile::get(self::PROFILE_PREFIX.'active', 1),
 			'rows' => $rows,
+			'compare_pairs' => $compare_pairs,
 			'graph' => $graph,
 			'time_presets' => TimePresets::all(),
 			'definition' => $definition !== null
