@@ -104,8 +104,7 @@ $scope_tab = (new CFormGrid())
 				'popup' => [
 					'filter_preselect' => [
 						'id' => 'hostids_',
-						'submit_as' => 'hostids',
-						'multiple' => true
+						'submit_as' => 'hostid'
 					],
 					'parameters' => [
 						'srctbl' => 'items',
@@ -119,8 +118,7 @@ $scope_tab = (new CFormGrid())
 				'autosuggest' => [
 					'filter_preselect' => [
 						'id' => 'hostids_',
-						'submit_as' => 'hostids',
-						'multiple' => true
+						'submit_as' => 'hostid'
 					]
 				]
 			]))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)
@@ -138,8 +136,7 @@ $scope_tab = (new CFormGrid())
 				'popup' => [
 					'filter_preselect' => [
 						'id' => 'hostids_',
-						'submit_as' => 'hostids',
-						'multiple' => true
+						'submit_as' => 'hostid'
 					],
 					'parameters' => [
 						'srctbl' => 'triggers',
@@ -151,8 +148,7 @@ $scope_tab = (new CFormGrid())
 				'autosuggest' => [
 					'filter_preselect' => [
 						'id' => 'hostids_',
-						'submit_as' => 'hostids',
-						'multiple' => true
+						'submit_as' => 'hostid'
 					]
 				]
 			]))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)

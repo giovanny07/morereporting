@@ -68,8 +68,7 @@ $scope_fields = $data['definition'] !== null ? [] : [
 					'popup' => [
 						'filter_preselect' => [
 							'id' => 'filter_hostids_',
-							'submit_as' => 'hostids',
-							'multiple' => true
+							'submit_as' => 'hostid'
 						],
 						'parameters' => [
 							'srctbl' => 'items',
@@ -83,8 +82,7 @@ $scope_fields = $data['definition'] !== null ? [] : [
 					'autosuggest' => [
 						'filter_preselect' => [
 							'id' => 'filter_hostids_',
-							'submit_as' => 'hostids',
-							'multiple' => true
+							'submit_as' => 'hostid'
 						]
 					]
 				]))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)

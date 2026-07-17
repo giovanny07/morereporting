@@ -2,6 +2,16 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.6.3 - Fix item/trigger pattern autosuggest not scoped by host
+
+### Fixed
+- Choosing a host, then typing in the Item/Trigger name pattern field, kept suggesting items/triggers from every host - the host selection was silently ignored. Root cause: the as-you-type autosuggest for `CPatternSelect` goes through a completely different endpoint than the "browse" popup (`jsrpc.php?method=patternselect.get`, not `zabbix.php?action=popup.generic`), and that endpoint's handler for `object_name=items` only reads a singular `hostid` parameter - never the plural `hostids` our `filter_preselect` chain was sending (silently ignored, not rejected, so it never surfaced as an error). Changed `submit_as` from `hostids` to `hostid` (and dropped `multiple: true`, for the same reason as the groupid fix in 0.6.2) on every Hosts -> pattern chain, in the builder and both run pages.
+- Also fixed the same underlying param-name mismatch on the item/trigger "browse" popup itself, which happened to not error but also wasn't truly scoped (verified by comparing actual result content, not just HTTP status - see Tooling below).
+- **Known native limitation, not a bug here**: `jsrpc.php`'s `patternselect.get` only supports `object_name` in `{hosts, items, graphs}` - `triggers` isn't handled at all. The Trigger name patterns field's autosuggest can never show live suggestions from real trigger names; typing a pattern by hand still works correctly, and its "browse" popup button is properly host-scoped.
+
+### Tooling
+- Rewrote the `filter_preselect` smoke checks to assert actual result-set narrowing/widening (via row counts), not just "no error" - the previous version passed even with the exact `hostids` vs `hostid` bug above, because an unrecognized param is silently ignored rather than rejected, so "no error" alone proves nothing. Also added a check against `jsrpc.php`'s `patternselect.get` directly, the endpoint the original bug report actually came from. Discovered and worked around a related testing gotcha: `popup.generic` persists whatever host/group scope you pass it into the user's profile (`web.popup.generic.filter_hostid`/`filter_groupid`), so a later "unscoped" check in the same run can be silently pre-scoped by an earlier check's leftover state - the script now resets that profile state before each comparison.
+
 ## 0.6.2 - Fix "Incorrect value for groupid field"
 
 ### Fixed
