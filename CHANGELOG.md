@@ -2,6 +2,17 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.15.0 - Phase 5.2: Capacity forecast (linear trend / timeleft)
+
+### Added
+- New "Capacity forecast" report (`morereporting.capacity`), selectable in the report builder. For numeric items matching the filter, fits a simple linear trend (least squares) over the history values in the selected period, then estimates how many days until the trend reaches a configurable threshold - the same "fit + extrapolate" idea as native Zabbix's `timeleft()`/`forecast()` trigger functions (default linear mode), but computed over many items in one report instead of one item per trigger.
+- `includes/reports/CapacityForecastReport.php`: per-item linear regression (x = seconds since the window start, for numerical stability) giving slope/day and a projected days-to-threshold, or `null` when the trend is flat or moving away from the threshold rather than toward it (shown as "N/A", not a misleading negative/zero value). Covered by 7 unit tests (`tests/Includes/Reports/CapacityForecastReportTest.php`) verifying the regression math against known linear datasets, including the flat-trend and moving-away-from-threshold edge cases.
+- Single global "Threshold" field (default 0), applied to every item in the filtered scope - confirmed design choice: the report assumes the user scopes the filter to items sharing a unit/meaning (e.g. "Free disk space on *"), same precedent as the existing multi-item reports not validating unit consistency across the scope.
+- Same full export parity (JSON/CSV/YAML/PDF) from day one, reusing the Phase 4 mechanism.
+
+### Verified
+- End-to-end via `http_smoke.sh` (interactive page + all 4 export formats) against the real host - correctly returns 25 items with real trend data. Also verified the full builder path manually (create -> run by `reportid` -> delete), same as Phase 5.1.
+
 ## 0.14.0 - Phase 5.1: Anomaly detection (baseline/z-score)
 
 ### Added

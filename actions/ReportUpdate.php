@@ -28,6 +28,7 @@ class ReportUpdate extends CController {
 			'slo' =>			'string',
 			'baseline_days' =>	'string',
 			'zscore_threshold' =>	'string',
+			'threshold' =>		'string',
 			'period_from' =>	'required|string|not_empty',
 			'period_to' =>		'required|string|not_empty',
 			'status_enabled' =>	'in 1'
@@ -77,6 +78,7 @@ class ReportUpdate extends CController {
 			'slo' => $this->getInput('slo', '99.9'),
 			'baseline_days' => $this->getInput('baseline_days', '30'),
 			'zscore_threshold' => $this->getInput('zscore_threshold', '3'),
+			'threshold' => $this->getInput('threshold', '0'),
 			'period' => [
 				'from' => $this->getInput('period_from'),
 				'to' => $this->getInput('period_to')
