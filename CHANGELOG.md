@@ -2,6 +2,12 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.5.1 - Report builder mechanism fixes
+
+### Fixed
+- The SLO field no longer shows for report types that don't use it (e.g. Item percentiles); it now toggles based on the selected report type, mirroring the `CViewSwitcher` pattern native forms (e.g. item edit) use for type-dependent fields. `ReportTypeRegistry` now declares which optional fields each type uses.
+- Name pattern matching now supports real wildcards (`searchWildcardsEnabled` on the underlying `API::Item()`/`API::Trigger()` calls): `*` matches any number of characters (e.g. `CPU*`, `*disk*`), while plain text without `*` still does a simple contains-match as before. Field labels/placeholders updated to make this explicit.
+
 ## 0.5.0 - Phase 2 polish
 
 ### Added

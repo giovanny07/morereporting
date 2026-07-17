@@ -47,10 +47,11 @@ $scope_fields = $data['definition'] !== null ? [] : [
 			)
 		])
 		->addItem([
-			new CLabel(_('Item name contains'), 'filter_pattern'),
+			new CLabel(_('Item name pattern'), 'filter_pattern'),
 			new CFormField(
 				(new CTextBox('filter_pattern', $data['filter']['pattern']))
 					->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)
+					->setAttribute('placeholder', _('e.g. CPU* or *disk*'))
 			)
 		])
 ];

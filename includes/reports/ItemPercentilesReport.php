@@ -20,6 +20,7 @@ class ItemPercentilesReport extends ReportType {
 			'groupids' => $filter['groupids'] ?: null,
 			'hostids' => $filter['hostids'] ?: null,
 			'search' => $filter['pattern'] !== '' ? ['name' => $filter['pattern']] : null,
+			'searchWildcardsEnabled' => true,
 			'filter' => [
 				'value_type' => [ITEM_VALUE_TYPE_FLOAT, ITEM_VALUE_TYPE_UINT64],
 				'status' => ITEM_STATUS_ACTIVE

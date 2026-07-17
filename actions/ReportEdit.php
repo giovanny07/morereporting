@@ -81,6 +81,7 @@ class ReportEdit extends CController {
 			'period_to' => $config['period']['to'] ?? 'now',
 			'status' => $definition['status'] ?? ZBX_REPORT_STATUS_ENABLED,
 			'report_type_labels' => ReportTypeRegistry::labels(),
+			'report_type_fields' => ReportTypeRegistry::fieldsMap(),
 			'time_presets' => TimePresets::all()
 		];
 

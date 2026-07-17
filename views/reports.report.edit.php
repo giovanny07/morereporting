@@ -84,15 +84,19 @@ $scope_tab = (new CFormGrid())
 	])
 	->addItem([
 		new CLabel(_('Name pattern'), 'pattern'),
-		new CFormField(
-			(new CTextBox('pattern', $data['pattern']))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)
-		)
+		new CFormField([
+			(new CTextBox('pattern', $data['pattern']))
+				->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)
+				->setAttribute('placeholder', _('e.g. CPU* or *disk*, leave empty to match everything')),
+			(new CDiv(_('Matches item names (Item percentiles) or trigger names (Trigger availability). Use * as a wildcard for any number of characters; without *, it matches names containing this text.')))
+				->addClass(ZBX_STYLE_GREY)
+		])
 	])
 	->addItem([
-		new CLabel(_('SLO %'), 'slo'),
-		new CFormField(
+		(new CLabel(_('SLO %'), 'slo'))->setId('slo-label'),
+		(new CFormField(
 			(new CTextBox('slo', $data['slo']))->setWidth(100)
-		)
+		))->setId('slo-field')
 	]);
 
 $period_presets = new CList();
@@ -150,4 +154,21 @@ $form->addItem(
 (new CHtmlPage())
 	->setTitle($data['reportid'] === null ? _('New report') : _('Edit report'))
 	->addItem($form)
+	->show();
+
+(new CScriptTag('
+	const type_fields = '.json_encode($data['report_type_fields']).';
+	const report_type = document.getElementById("report_type");
+
+	const toggleTypeFields = () => {
+		const visible = (type_fields[report_type.value] || []).includes("slo");
+
+		document.getElementById("slo-label").style.display = visible ? "" : "none";
+		document.getElementById("slo-field").style.display = visible ? "" : "none";
+	};
+
+	report_type.addEventListener("change", toggleTypeFields);
+	toggleTypeFields();
+'))
+	->setOnDocumentReady()
 	->show();
