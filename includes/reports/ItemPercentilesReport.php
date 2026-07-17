@@ -19,8 +19,9 @@ class ItemPercentilesReport extends ReportType {
 			'selectHosts' => ['hostid', 'name'],
 			'groupids' => $filter['groupids'] ?: null,
 			'hostids' => $filter['hostids'] ?: null,
-			'search' => $filter['pattern'] !== '' ? ['name' => $filter['pattern']] : null,
+			'search' => $filter['patterns'] ? ['name' => $filter['patterns']] : null,
 			'searchWildcardsEnabled' => true,
+			'searchByAny' => true,
 			'filter' => [
 				'value_type' => [ITEM_VALUE_TYPE_FLOAT, ITEM_VALUE_TYPE_UINT64],
 				'status' => ITEM_STATUS_ACTIVE

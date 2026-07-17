@@ -6,8 +6,10 @@ namespace Modules\MoreReporting\Includes;
  * Maps a saved report definition's `report_type` key to its display label, the action
  * that runs it, and which optional config fields it actually uses (so the builder form
  * can hide fields that are meaningless for the selected type, e.g. SLO only applies to
- * availability). New ReportType implementations register here so they become selectable
- * without any other part of the module knowing about them.
+ * availability, and the item-pattern vs trigger-pattern field only applies to its own
+ * type since they browse different source tables). New ReportType implementations
+ * register here so they become selectable without any other part of the module knowing
+ * about them.
  */
 class ReportTypeRegistry {
 
@@ -17,11 +19,11 @@ class ReportTypeRegistry {
 	private const TYPES = [
 		self::PERCENTILES => [
 			'action' => 'morereporting.percentiles',
-			'fields' => ['pattern']
+			'fields' => ['item_pattern']
 		],
 		self::AVAILABILITY => [
 			'action' => 'morereporting.availability',
-			'fields' => ['pattern', 'slo']
+			'fields' => ['trigger_pattern', 'slo']
 		]
 	];
 
@@ -41,7 +43,7 @@ class ReportTypeRegistry {
 	}
 
 	/**
-	 * @return array  Optional config field keys used by this type (e.g. ['pattern', 'slo']).
+	 * @return array  Optional config field keys used by this type (e.g. ['item_pattern']).
 	 */
 	public static function fields(string $type): array {
 		return self::TYPES[$type]['fields'] ?? [];

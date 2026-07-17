@@ -47,11 +47,25 @@ $scope_fields = $data['definition'] !== null ? [] : [
 			)
 		])
 		->addItem([
-			new CLabel(_('Item name pattern'), 'filter_pattern'),
+			new CLabel(_('Item name patterns'), 'filter_patterns__ms'),
 			new CFormField(
-				(new CTextBox('filter_pattern', $data['filter']['pattern']))
-					->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)
-					->setAttribute('placeholder', _('e.g. CPU* or *disk*'))
+				(new CPatternSelect([
+					'name' => 'filter_patterns[]',
+					'object_name' => 'items',
+					'data' => $data['filter']['patterns'],
+					'placeholder' => _('item patterns'),
+					'wildcard_allowed' => true,
+					'popup' => [
+						'parameters' => [
+							'srctbl' => 'items',
+							'srcfld1' => 'name',
+							'dstfrm' => 'zbx_filter',
+							'dstfld1' => 'filter_patterns_',
+							'real_hosts' => true,
+							'numeric' => true
+						]
+					]
+				]))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)
 			)
 		])
 ];

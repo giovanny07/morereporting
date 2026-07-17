@@ -21,8 +21,9 @@ class AvailabilityReport extends ReportType {
 			'selectHosts' => ['hostid', 'name'],
 			'groupids' => $filter['groupids'] ?: null,
 			'hostids' => $filter['hostids'] ?: null,
-			'search' => $filter['pattern'] !== '' ? ['description' => $filter['pattern']] : null,
+			'search' => $filter['patterns'] ? ['description' => $filter['patterns']] : null,
 			'searchWildcardsEnabled' => true,
+			'searchByAny' => true,
 			'monitored' => true,
 			'sortfield' => 'description',
 			'limit' => self::TRIGGER_LIMIT

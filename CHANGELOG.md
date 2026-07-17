@@ -2,6 +2,13 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.6.0 - Native item/trigger pattern picker
+
+### Changed
+- Replaced the plain-text name pattern field with `CPatternSelect` - the same multi-value, wildcard-aware, autocomplete-driven picker Zabbix's own Graph widget uses for its "Item pattern" dataset mode. Item percentiles gets an "Item name patterns" picker (browses `items`), Trigger availability gets a separate "Trigger name patterns" picker (browses `triggers`) - shown/hidden by report type using the same toggle mechanism as the SLO field.
+- A definition can now hold **multiple** patterns (`config.patterns`, an array), matched with OR semantics (`searchByAny`) - e.g. `CPU*` and `*disk*` together, not just one pattern at a time.
+- `filter_pattern` (single string) renamed to `filter_patterns[]` (array) across both run pages' ad-hoc filters and the builder; `ReportType::getData()` implementations updated accordingly.
+
 ## 0.5.1 - Report builder mechanism fixes
 
 ### Fixed

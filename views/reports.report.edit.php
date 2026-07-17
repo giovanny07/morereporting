@@ -83,14 +83,53 @@ $scope_tab = (new CFormGrid())
 		)
 	])
 	->addItem([
-		new CLabel(_('Name pattern'), 'pattern'),
-		new CFormField([
-			(new CTextBox('pattern', $data['pattern']))
-				->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)
-				->setAttribute('placeholder', _('e.g. CPU* or *disk*, leave empty to match everything')),
-			(new CDiv(_('Matches item names (Item percentiles) or trigger names (Trigger availability). Use * as a wildcard for any number of characters; without *, it matches names containing this text.')))
+		(new CLabel(_('Item name patterns'), 'item_patterns__ms'))->setId('item-pattern-label'),
+		(new CFormField(
+			(new CPatternSelect([
+				'name' => 'item_patterns[]',
+				'object_name' => 'items',
+				'data' => $data['item_patterns'],
+				'placeholder' => _('item patterns'),
+				'wildcard_allowed' => true,
+				'popup' => [
+					'parameters' => [
+						'srctbl' => 'items',
+						'srcfld1' => 'name',
+						'dstfrm' => 'morereporting-report-edit',
+						'dstfld1' => 'item_patterns_',
+						'real_hosts' => true,
+						'numeric' => true
+					]
+				]
+			]))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)
+		))->setId('item-pattern-field')
+	])
+	->addItem([
+		(new CLabel(_('Trigger name patterns'), 'trigger_patterns__ms'))->setId('trigger-pattern-label'),
+		(new CFormField(
+			(new CPatternSelect([
+				'name' => 'trigger_patterns[]',
+				'object_name' => 'triggers',
+				'data' => $data['trigger_patterns'],
+				'placeholder' => _('trigger patterns'),
+				'wildcard_allowed' => true,
+				'popup' => [
+					'parameters' => [
+						'srctbl' => 'triggers',
+						'srcfld1' => 'description',
+						'dstfrm' => 'morereporting-report-edit',
+						'dstfld1' => 'trigger_patterns_'
+					]
+				]
+			]))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)
+		))->setId('trigger-pattern-field')
+	])
+	->addItem([
+		new CLabel(''),
+		new CFormField(
+			(new CDiv(_('Use * as a wildcard for any number of characters (e.g. CPU*, *disk*); leave empty to match everything. Pick from the popup or type your own and press Enter.')))
 				->addClass(ZBX_STYLE_GREY)
-		])
+		)
 	])
 	->addItem([
 		(new CLabel(_('SLO %'), 'slo'))->setId('slo-label'),
@@ -160,11 +199,22 @@ $form->addItem(
 	const type_fields = '.json_encode($data['report_type_fields']).';
 	const report_type = document.getElementById("report_type");
 
-	const toggleTypeFields = () => {
-		const visible = (type_fields[report_type.value] || []).includes("slo");
+	const row_by_field = {
+		slo: ["slo-label", "slo-field"],
+		item_pattern: ["item-pattern-label", "item-pattern-field"],
+		trigger_pattern: ["trigger-pattern-label", "trigger-pattern-field"]
+	};
 
-		document.getElementById("slo-label").style.display = visible ? "" : "none";
-		document.getElementById("slo-field").style.display = visible ? "" : "none";
+	const toggleTypeFields = () => {
+		const visible_fields = type_fields[report_type.value] || [];
+
+		for (const [field, ids] of Object.entries(row_by_field)) {
+			const visible = visible_fields.includes(field);
+
+			for (const id of ids) {
+				document.getElementById(id).style.display = visible ? "" : "none";
+			}
+		}
 	};
 
 	report_type.addEventListener("change", toggleTypeFields);

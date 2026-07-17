@@ -23,7 +23,8 @@ class ReportUpdate extends CController {
 			'report_type' =>	'required|string|not_empty',
 			'groupids' =>		'array_db hosts_groups.groupid',
 			'hostids' =>		'array_db hosts.hostid',
-			'pattern' =>		'string',
+			'item_patterns' =>		'array',
+			'trigger_patterns' =>	'array',
 			'slo' =>			'string',
 			'period_from' =>	'required|string|not_empty',
 			'period_to' =>		'required|string|not_empty',
@@ -60,10 +61,17 @@ class ReportUpdate extends CController {
 	}
 
 	protected function doAction(): void {
+		$report_type = $this->getInput('report_type');
+
+		// Only the field relevant to the selected type is trusted, even if the other one's
+		// (hidden) inputs were also submitted - see ReportTypeRegistry::fields().
+		$patterns_field = $report_type === ReportTypeRegistry::AVAILABILITY ? 'trigger_patterns' : 'item_patterns';
+		$patterns = array_values(array_filter($this->getInput($patterns_field, []), static fn($p) => $p !== ''));
+
 		$config = [
 			'groupids' => $this->getInput('groupids', []),
 			'hostids' => $this->getInput('hostids', []),
-			'pattern' => $this->getInput('pattern', ''),
+			'patterns' => $patterns,
 			'slo' => $this->getInput('slo', '99.9'),
 			'period' => [
 				'from' => $this->getInput('period_from'),
@@ -72,7 +80,6 @@ class ReportUpdate extends CController {
 		];
 
 		$name = $this->getInput('name');
-		$report_type = $this->getInput('report_type');
 		$status = $this->hasInput('status_enabled') ? ZBX_REPORT_STATUS_ENABLED : ZBX_REPORT_STATUS_DISABLED;
 
 		if ($this->hasInput('reportid')) {

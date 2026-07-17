@@ -29,7 +29,7 @@ class ReportsAvailability extends CController {
 			'reportid' =>			'id',
 			'filter_groupids' =>	'array_db hosts_groups.groupid',
 			'filter_hostids' =>	'array_db hosts.hostid',
-			'filter_pattern' =>	'string',
+			'filter_patterns' =>	'array',
 			'filter_slo' =>			'string',
 			'filter_date_from' =>	'string',
 			'filter_date_to' =>	'string',
@@ -59,7 +59,7 @@ class ReportsAvailability extends CController {
 			$filter = [
 				'groupids' => $config['groupids'] ?? [],
 				'hostids' => $config['hostids'] ?? [],
-				'pattern' => $config['pattern'] ?? '',
+				'patterns' => $config['patterns'] ?? [],
 				'slo' => $config['slo'] ?? '99.9',
 				'date_from' => $this->getInput('filter_date_from', $config['period']['from'] ?? 'now-7d'),
 				'date_to' => $this->getInput('filter_date_to', $config['period']['to'] ?? 'now')
@@ -73,7 +73,7 @@ class ReportsAvailability extends CController {
 				CProfile::updateArray(self::PROFILE_PREFIX.'hostids', $this->getInput('filter_hostids', []),
 					PROFILE_TYPE_ID
 				);
-				CProfile::update(self::PROFILE_PREFIX.'pattern', $this->getInput('filter_pattern', ''),
+				CProfile::updateArray(self::PROFILE_PREFIX.'patterns', $this->getInput('filter_patterns', []),
 					PROFILE_TYPE_STR
 				);
 				CProfile::update(self::PROFILE_PREFIX.'slo', $this->getInput('filter_slo', ''), PROFILE_TYPE_STR);
@@ -87,7 +87,7 @@ class ReportsAvailability extends CController {
 			elseif ($this->hasInput('filter_rst')) {
 				CProfile::deleteIdx(self::PROFILE_PREFIX.'groupids');
 				CProfile::deleteIdx(self::PROFILE_PREFIX.'hostids');
-				CProfile::delete(self::PROFILE_PREFIX.'pattern');
+				CProfile::deleteIdx(self::PROFILE_PREFIX.'patterns');
 				CProfile::delete(self::PROFILE_PREFIX.'slo');
 				CProfile::delete(self::PROFILE_PREFIX.'date_from');
 				CProfile::delete(self::PROFILE_PREFIX.'date_to');
@@ -96,7 +96,7 @@ class ReportsAvailability extends CController {
 			$filter = [
 				'groupids' => CProfile::getArray(self::PROFILE_PREFIX.'groupids', []),
 				'hostids' => CProfile::getArray(self::PROFILE_PREFIX.'hostids', []),
-				'pattern' => CProfile::get(self::PROFILE_PREFIX.'pattern', ''),
+				'patterns' => CProfile::getArray(self::PROFILE_PREFIX.'patterns', []),
 				'slo' => CProfile::get(self::PROFILE_PREFIX.'slo', '99.9'),
 				'date_from' => CProfile::get(self::PROFILE_PREFIX.'date_from', 'now-7d'),
 				'date_to' => CProfile::get(self::PROFILE_PREFIX.'date_to', 'now')
@@ -131,7 +131,7 @@ class ReportsAvailability extends CController {
 		$raw_data = $report->getData([
 			'groupids' => $filter['groupids'],
 			'hostids' => $filter['hostids'],
-			'pattern' => $filter['pattern'],
+			'patterns' => $filter['patterns'],
 			'time_from' => $time_from,
 			'time_to' => $time_to
 		]);

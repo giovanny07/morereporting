@@ -67,15 +67,19 @@ class ReportEdit extends CController {
 			]), ['hostid' => 'id'])
 			: [];
 
+		$report_type = $definition['report_type'] ?? ReportTypeRegistry::PERCENTILES;
+		$patterns = $config['patterns'] ?? [];
+
 		$data = [
 			'reportid' => $definition['reportid'] ?? null,
 			'name' => $definition['name'] ?? '',
-			'report_type' => $definition['report_type'] ?? ReportTypeRegistry::PERCENTILES,
+			'report_type' => $report_type,
 			'groupids' => $groupids,
 			'groups' => $groups,
 			'hostids' => $hostids,
 			'hosts' => $hosts,
-			'pattern' => $config['pattern'] ?? '',
+			'item_patterns' => $report_type === ReportTypeRegistry::PERCENTILES ? $patterns : [],
+			'trigger_patterns' => $report_type === ReportTypeRegistry::AVAILABILITY ? $patterns : [],
 			'slo' => $config['slo'] ?? '99.9',
 			'period_from' => $config['period']['from'] ?? 'now-7d',
 			'period_to' => $config['period']['to'] ?? 'now',
