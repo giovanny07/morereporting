@@ -11,3 +11,4 @@
 require_once __DIR__.'/../includes/ReportType.php';
 require_once __DIR__.'/../includes/ReportComparison.php';
 require_once __DIR__.'/../includes/reports/ItemPercentilesReport.php';
+require_once __DIR__.'/../includes/reports/AnomalyReport.php';

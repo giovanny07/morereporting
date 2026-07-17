@@ -15,6 +15,7 @@ class ReportTypeRegistry {
 
 	public const PERCENTILES = 'percentiles';
 	public const AVAILABILITY = 'availability';
+	public const ANOMALY = 'anomaly';
 
 	private const TYPES = [
 		self::PERCENTILES => [
@@ -24,13 +25,18 @@ class ReportTypeRegistry {
 		self::AVAILABILITY => [
 			'action' => 'morereporting.availability',
 			'fields' => ['trigger_pattern', 'slo']
+		],
+		self::ANOMALY => [
+			'action' => 'morereporting.anomaly',
+			'fields' => ['item_pattern', 'baseline_days', 'zscore_threshold']
 		]
 	];
 
 	public static function labels(): array {
 		return [
 			self::PERCENTILES => _('Item percentiles'),
-			self::AVAILABILITY => _('Trigger availability')
+			self::AVAILABILITY => _('Trigger availability'),
+			self::ANOMALY => _('Anomaly detection')
 		];
 	}
 

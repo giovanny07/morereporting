@@ -26,6 +26,8 @@ class ReportUpdate extends CController {
 			'item_patterns' =>		'array',
 			'trigger_patterns' =>	'array',
 			'slo' =>			'string',
+			'baseline_days' =>	'string',
+			'zscore_threshold' =>	'string',
 			'period_from' =>	'required|string|not_empty',
 			'period_to' =>		'required|string|not_empty',
 			'status_enabled' =>	'in 1'
@@ -73,6 +75,8 @@ class ReportUpdate extends CController {
 			'hostids' => $this->getInput('hostids', []),
 			'patterns' => $patterns,
 			'slo' => $this->getInput('slo', '99.9'),
+			'baseline_days' => $this->getInput('baseline_days', '30'),
+			'zscore_threshold' => $this->getInput('zscore_threshold', '3'),
 			'period' => [
 				'from' => $this->getInput('period_from'),
 				'to' => $this->getInput('period_to')

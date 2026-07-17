@@ -166,6 +166,18 @@ $scope_tab = (new CFormGrid())
 		(new CFormField(
 			(new CTextBox('slo', $data['slo']))->setWidth(100)
 		))->setId('slo-field')
+	])
+	->addItem([
+		(new CLabel(_('Baseline (days before period)'), 'baseline_days'))->setId('baseline-days-label'),
+		(new CFormField(
+			(new CTextBox('baseline_days', $data['baseline_days']))->setWidth(100)
+		))->setId('baseline-days-field')
+	])
+	->addItem([
+		(new CLabel(_('Z-score threshold'), 'zscore_threshold'))->setId('zscore-threshold-label'),
+		(new CFormField(
+			(new CTextBox('zscore_threshold', $data['zscore_threshold']))->setWidth(100)
+		))->setId('zscore-threshold-field')
 	]);
 
 $period_presets = new CList();
@@ -232,7 +244,9 @@ $form->addItem(
 	const row_by_field = {
 		slo: ["slo-label", "slo-field"],
 		item_pattern: ["item-pattern-label", "item-pattern-field"],
-		trigger_pattern: ["trigger-pattern-label", "trigger-pattern-field"]
+		trigger_pattern: ["trigger-pattern-label", "trigger-pattern-field"],
+		baseline_days: ["baseline-days-label", "baseline-days-field"],
+		zscore_threshold: ["zscore-threshold-label", "zscore-threshold-field"]
 	};
 
 	const toggleTypeFields = () => {

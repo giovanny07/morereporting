@@ -2,6 +2,18 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.14.0 - Phase 5.1: Anomaly detection (baseline/z-score)
+
+### Added
+- New "Anomaly detection" report (`morereporting.anomaly`), selectable in the report builder like any other type. For numeric items matching the filter, computes a baseline mean/stddev from a reference window preceding the analysis period, then flags analysis-period values whose z-score (deviation from the baseline mean, in baseline standard deviations) meets or exceeds a threshold.
+- `includes/reports/AnomalyReport.php`: fetches history for two separate windows per item (baseline + analysis) and computes anomaly count, anomaly rate, max |z|, and the single worst (value, timestamp) pair per item. Covered by unit tests (`tests/Includes/Reports/AnomalyReportTest.php`) - pure computation logic, no framework dependency, mirroring `ItemPercentilesReportTest.php`'s style.
+- Both the baseline window length ("Baseline (days before period)", default 30) and the z-score threshold (default 3, the conventional statistical anomaly cutoff) are user-configurable fields, in both the ad-hoc filter and the report builder (`ReportTypeRegistry::ANOMALY` fields: `item_pattern`, `baseline_days`, `zscore_threshold`) - confirmed design choice over a fixed threshold or a seasonal (same-weekday) baseline, to keep the first cut simple and reuse the existing period-field mechanism.
+- Full export parity with the other report types from day one (JSON/CSV/YAML/PDF) - reused the already-established `export_headers`/`export_rows` + `PdfReportHtml`/`PdfRenderer` pattern from Phase 4, so this was low incremental cost, not a new mechanism.
+- Items with fewer than 2 baseline points, or a flat (zero-stddev) baseline, are skipped rather than shown with an undefined/misleading z-score.
+
+### Verified
+- End-to-end via `http_smoke.sh` (interactive page + all 4 export formats) and manually via the real builder form: created a saved "Anomaly detection" definition through `morereporting.report.update`, ran it via `reportid` (confirms the saved-definition path, not just the ad-hoc filter path), then removed the test row.
+
 ## 0.13.0 - Phase 4.5: PDF export
 
 ### Added

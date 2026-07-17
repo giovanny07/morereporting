@@ -368,15 +368,20 @@ log_in
 check_action "morereporting.list"
 check_action "morereporting.percentiles"
 check_action "morereporting.availability"
+check_action "morereporting.anomaly"
 check_action "morereporting.report.edit"
 check_json_export "morereporting.percentiles.json"
 check_json_export "morereporting.availability.json"
+check_json_export "morereporting.anomaly.json"
 check_csv_export "morereporting.percentiles.csv"
 check_csv_export "morereporting.availability.csv"
+check_csv_export "morereporting.anomaly.csv"
 check_yaml_export "morereporting.percentiles.yaml"
 check_yaml_export "morereporting.availability.yaml"
+check_yaml_export "morereporting.anomaly.yaml"
 check_pdf_export "morereporting.percentiles.pdf"
 check_pdf_export "morereporting.availability.pdf"
+check_pdf_export "morereporting.anomaly.pdf"
 
 # Host groups -> Hosts (popup.generic, submit_as: groupid, no "multiple" - see 0.6.2).
 # Not host_preselect_required, so it shows everything unscoped and narrows once scoped.
