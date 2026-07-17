@@ -7,6 +7,9 @@ All notable changes to this module are documented here. Versions follow the `ver
 ### Fixed
 - Selecting a host group then trying to pick a host failed with "Incorrect value for \"groupid\" field". Caused by wrongly setting `multiple: true` on the Host groups -> Hosts `filter_preselect` chain: the popup's `groupid` parameter only accepts a single value (`db hstgrp.groupid`, unlike `hostids` which accepts an array), so submitting it as an array failed validation. Removed `multiple` from that specific chain (matches native `trigger.list.php`, which also only preselects the first selected group) - the Hosts -> pattern chain (`hostids`, plural) is unaffected and keeps `multiple: true`.
 
+### Tooling
+- `scripts/http_smoke.sh` now also simulates the `popup.generic` AJAX requests the browser's JS constructs for each `filter_preselect` chain (host groups -> hosts, hosts -> item/trigger patterns). Neither PHPUnit nor the existing page-load checks could have caught this bug - the request only fires on a follow-up interaction, never during a plain page load. Verified the new check genuinely fails against the broken (array-shaped `groupid[]`) request before confirming it passes against the fix.
+
 ## 0.6.1 - Chain scope filters together
 
 ### Fixed
