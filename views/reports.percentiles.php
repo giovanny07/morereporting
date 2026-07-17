@@ -36,11 +36,23 @@ $scope_fields = $data['definition'] !== null ? [] : [
 					'object_name' => 'hosts',
 					'data' => $data['hosts'],
 					'popup' => [
+						'filter_preselect' => [
+							'id' => 'filter_groupids_',
+							'submit_as' => 'groupid',
+							'multiple' => true
+						],
 						'parameters' => [
 							'srctbl' => 'hosts',
 							'srcfld1' => 'hostid',
 							'dstfrm' => 'zbx_filter',
 							'dstfld1' => 'filter_hostids_'
+						]
+					],
+					'autosuggest' => [
+						'filter_preselect' => [
+							'id' => 'filter_groupids_',
+							'submit_as' => 'groupid',
+							'multiple' => true
 						]
 					]
 				]))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)
@@ -56,6 +68,11 @@ $scope_fields = $data['definition'] !== null ? [] : [
 					'placeholder' => _('item patterns'),
 					'wildcard_allowed' => true,
 					'popup' => [
+						'filter_preselect' => [
+							'id' => 'filter_hostids_',
+							'submit_as' => 'hostids',
+							'multiple' => true
+						],
 						'parameters' => [
 							'srctbl' => 'items',
 							'srcfld1' => 'name',
@@ -63,6 +80,13 @@ $scope_fields = $data['definition'] !== null ? [] : [
 							'dstfld1' => 'filter_patterns_',
 							'real_hosts' => true,
 							'numeric' => true
+						]
+					],
+					'autosuggest' => [
+						'filter_preselect' => [
+							'id' => 'filter_hostids_',
+							'submit_as' => 'hostids',
+							'multiple' => true
 						]
 					]
 				]))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)

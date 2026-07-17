@@ -2,6 +2,11 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.6.1 - Chain scope filters together
+
+### Fixed
+- Host groups, Hosts, and Item/Trigger name patterns now actually filter each other, using the same `filter_preselect` mechanism native pages (e.g. `trigger.list.php`) use to chain multiselects: picking a Host group narrows the Hosts popup/autosuggest to that group, and picking a Host narrows the item/trigger pattern popup to that host. Applied to the builder and both run pages' ad-hoc filters.
+
 ## 0.6.0 - Native item/trigger pattern picker
 
 ### Changed

@@ -72,11 +72,23 @@ $scope_tab = (new CFormGrid())
 				'object_name' => 'hosts',
 				'data' => $data['hosts'],
 				'popup' => [
+					'filter_preselect' => [
+						'id' => 'groupids_',
+						'submit_as' => 'groupid',
+						'multiple' => true
+					],
 					'parameters' => [
 						'srctbl' => 'hosts',
 						'srcfld1' => 'hostid',
 						'dstfrm' => 'morereporting-report-edit',
 						'dstfld1' => 'hostids_'
+					]
+				],
+				'autosuggest' => [
+					'filter_preselect' => [
+						'id' => 'groupids_',
+						'submit_as' => 'groupid',
+						'multiple' => true
 					]
 				]
 			]))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)
@@ -92,6 +104,11 @@ $scope_tab = (new CFormGrid())
 				'placeholder' => _('item patterns'),
 				'wildcard_allowed' => true,
 				'popup' => [
+					'filter_preselect' => [
+						'id' => 'hostids_',
+						'submit_as' => 'hostids',
+						'multiple' => true
+					],
 					'parameters' => [
 						'srctbl' => 'items',
 						'srcfld1' => 'name',
@@ -99,6 +116,13 @@ $scope_tab = (new CFormGrid())
 						'dstfld1' => 'item_patterns_',
 						'real_hosts' => true,
 						'numeric' => true
+					]
+				],
+				'autosuggest' => [
+					'filter_preselect' => [
+						'id' => 'hostids_',
+						'submit_as' => 'hostids',
+						'multiple' => true
 					]
 				]
 			]))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)
@@ -114,11 +138,23 @@ $scope_tab = (new CFormGrid())
 				'placeholder' => _('trigger patterns'),
 				'wildcard_allowed' => true,
 				'popup' => [
+					'filter_preselect' => [
+						'id' => 'hostids_',
+						'submit_as' => 'hostids',
+						'multiple' => true
+					],
 					'parameters' => [
 						'srctbl' => 'triggers',
 						'srcfld1' => 'description',
 						'dstfrm' => 'morereporting-report-edit',
 						'dstfld1' => 'trigger_patterns_'
+					]
+				],
+				'autosuggest' => [
+					'filter_preselect' => [
+						'id' => 'hostids_',
+						'submit_as' => 'hostids',
+						'multiple' => true
 					]
 				]
 			]))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)
