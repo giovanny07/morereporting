@@ -17,6 +17,7 @@ class ReportTypeRegistry {
 	public const AVAILABILITY = 'availability';
 	public const ANOMALY = 'anomaly';
 	public const CAPACITY = 'capacity';
+	public const HEATMAP = 'heatmap';
 
 	private const TYPES = [
 		self::PERCENTILES => [
@@ -34,6 +35,10 @@ class ReportTypeRegistry {
 		self::CAPACITY => [
 			'action' => 'morereporting.capacity',
 			'fields' => ['item_pattern', 'threshold']
+		],
+		self::HEATMAP => [
+			'action' => 'morereporting.heatmap',
+			'fields' => ['trigger_pattern']
 		]
 	];
 
@@ -42,7 +47,8 @@ class ReportTypeRegistry {
 			self::PERCENTILES => _('Item percentiles'),
 			self::AVAILABILITY => _('Trigger availability'),
 			self::ANOMALY => _('Anomaly detection'),
-			self::CAPACITY => _('Capacity forecast')
+			self::CAPACITY => _('Capacity forecast'),
+			self::HEATMAP => _('Severity heatmap')
 		];
 	}
 

@@ -81,7 +81,8 @@ class ReportEdit extends CController {
 			'item_patterns' => in_array($report_type,
 				[ReportTypeRegistry::PERCENTILES, ReportTypeRegistry::ANOMALY, ReportTypeRegistry::CAPACITY], true)
 					? $patterns : [],
-			'trigger_patterns' => $report_type === ReportTypeRegistry::AVAILABILITY ? $patterns : [],
+			'trigger_patterns' => in_array($report_type,
+				[ReportTypeRegistry::AVAILABILITY, ReportTypeRegistry::HEATMAP], true) ? $patterns : [],
 			'slo' => $config['slo'] ?? '99.9',
 			'baseline_days' => $config['baseline_days'] ?? '30',
 			'zscore_threshold' => $config['zscore_threshold'] ?? '3',

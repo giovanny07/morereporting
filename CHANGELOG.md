@@ -2,6 +2,20 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.16.0 - Phase 5.3: Severity heatmap (closes Phase 5)
+
+### Added
+- New "Severity heatmap" report (`morereporting.heatmap`), selectable in the report builder. A Host x Severity grid: for triggers matching the filter, counts problem episodes (`TRIGGER_VALUE_TRUE` events) per host and per severity within the selected period - shows at a glance which hosts generate the most (and the most severe) problems.
+- `includes/reports/SeverityHeatmapReport.php`: groups by the *event's own* severity (not the trigger's current one), since it can have been overridden or changed since the event fired - same distinction native Problems pages make. Covered by 6 unit tests (`tests/Includes/Reports/SeverityHeatmapReportTest.php`).
+- Cells are colored using `CSeverityHelper::makeSeverityCell()` - the exact native mechanism the Availability report already uses for its severity column - so the "heatmap" coloring is 100% native severity colors/labels (respects any admin-configured severity names/colors), zero custom CSS. Zero-count cells render as plain grey rather than a severity color, so the color signal only appears where there's an actual problem count, giving a real heatmap read without needing continuous-intensity shading (left as a Phase 6 visual refinement if ever wanted).
+- Reuses the existing "Trigger name patterns" scope field (shared with Availability) - no new builder field needed, unlike the previous two subphases.
+- Same full export parity (JSON/CSV/YAML/PDF) from day one.
+
+### Verified
+- End-to-end via `http_smoke.sh` and manually via the builder path (create -> run by `reportid` -> delete). Confirmed the native severity background CSS classes actually appear in the rendered page.
+
+**Phase 5 (Analítica avanzada) is now complete**: anomaly detection, capacity forecast, and severity heatmap all shipped with full export parity and builder support.
+
 ## 0.15.0 - Phase 5.2: Capacity forecast (linear trend / timeleft)
 
 ### Added

@@ -68,7 +68,8 @@ class ReportUpdate extends CController {
 
 		// Only the field relevant to the selected type is trusted, even if the other one's
 		// (hidden) inputs were also submitted - see ReportTypeRegistry::fields().
-		$patterns_field = $report_type === ReportTypeRegistry::AVAILABILITY ? 'trigger_patterns' : 'item_patterns';
+		$patterns_field = in_array($report_type, [ReportTypeRegistry::AVAILABILITY, ReportTypeRegistry::HEATMAP], true)
+			? 'trigger_patterns' : 'item_patterns';
 		$patterns = array_values(array_filter($this->getInput($patterns_field, []), static fn($p) => $p !== ''));
 
 		$config = [
