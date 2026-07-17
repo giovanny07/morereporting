@@ -144,7 +144,7 @@ $html_page = (new CHtmlPage())->setTitle($title);
 
 $controls = new CList();
 
-foreach (['json' => _('Export JSON'), 'csv' => _('Export CSV')] as $format => $label) {
+foreach (['json' => _('Export JSON'), 'csv' => _('Export CSV'), 'yaml' => _('Export YAML')] as $format => $label) {
 	$export_url = (new CUrl('zabbix.php'))
 		->setArgument('action', 'morereporting.percentiles.'.$format)
 		->setArgument('filter_groupids', $data['filter']['groupids'])

@@ -142,7 +142,11 @@ class ReportsPercentiles extends CController {
 
 		$rows = $report->render($report->compute($raw_data), 'interactive');
 
-		$export_formats = ['morereporting.percentiles.json' => 'json', 'morereporting.percentiles.csv' => 'csv'];
+		$export_formats = [
+			'morereporting.percentiles.json' => 'json',
+			'morereporting.percentiles.csv' => 'csv',
+			'morereporting.percentiles.yaml' => 'yaml'
+		];
 		$export_format = $export_formats[$this->getAction()] ?? null;
 		$is_export = $export_format !== null;
 

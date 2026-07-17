@@ -2,7 +2,7 @@
     "manifest_version": 2.0,
     "id": "imagunet_morereporting",
     "name": "MoreReporting",
-    "version": "0.11.0",
+    "version": "0.12.0",
     "namespace": "MoreReporting",
     "author": "Imagunet",
     "description": "Custom reporting module for Zabbix: availability, SLA, percentiles, anomalies and capacity planning.",
@@ -26,6 +26,11 @@
             "view": "reports.percentiles.csv",
             "layout": "layout.csv"
         },
+        "morereporting.percentiles.yaml": {
+            "class": "ReportsPercentiles",
+            "view": "reports.percentiles.yaml",
+            "layout": "layout.download.yaml"
+        },
         "morereporting.availability": {
             "class": "ReportsAvailability",
             "view": "reports.availability"
@@ -39,6 +44,11 @@
             "class": "ReportsAvailability",
             "view": "reports.availability.csv",
             "layout": "layout.csv"
+        },
+        "morereporting.availability.yaml": {
+            "class": "ReportsAvailability",
+            "view": "reports.availability.yaml",
+            "layout": "layout.download.yaml"
         },
         "morereporting.report.edit": {
             "class": "ReportEdit",

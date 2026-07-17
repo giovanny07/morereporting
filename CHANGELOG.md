@@ -2,6 +2,18 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.12.0 - Phase 4.3: YAML export
+
+### Added
+- "Export YAML" link next to JSON/CSV on both report run pages. Uses `symfony/yaml` (`^5.4`, chosen over the latest 8.x for PHP 8.0 compatibility - Zabbix 7.0's own floor - since symfony/yaml 8.x requires PHP >=8.4.1) as the module's own dependency rather than reusing the copy already vendored inside Zabbix's own `vendor/`, which would silently break if Zabbix ever updates/drops it.
+- `views/layout.download.yaml.php`: same idea as the JSON download layout, since core has no built-in YAML layout.
+
+### Changed
+- **New operational requirement**: this module now needs `composer install` to actually *run* (not just to test) - `Module.php` requires Composer's autoloader (`vendor/autoload.php`) at file scope, since Zabbix's own `CAutoloader` only knows this module's own namespace and has no idea about third-party dependencies like `symfony/yaml`. Every action still works without this *except* the new `.yaml` export ones. Worth calling out clearly for Phase 7 packaging/deployment docs.
+
+### Fixed/Verified
+- Validated actual YAML output with a real parser (Python's `yaml.safe_load`), not just a structural heuristic - parses correctly with all fields (including Phase 3's MTTR/MTBF) intact.
+
 ## 0.11.0 - Phase 4.2: CSV export
 
 ### Added

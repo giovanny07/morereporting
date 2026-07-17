@@ -146,7 +146,11 @@ class ReportsAvailability extends CController {
 
 		$rows = $report->render($report->compute($raw_data), 'interactive');
 
-		$export_formats = ['morereporting.availability.json' => 'json', 'morereporting.availability.csv' => 'csv'];
+		$export_formats = [
+			'morereporting.availability.json' => 'json',
+			'morereporting.availability.csv' => 'csv',
+			'morereporting.availability.yaml' => 'yaml'
+		];
 		$export_format = $export_formats[$this->getAction()] ?? null;
 		$is_export = $export_format !== null;
 
