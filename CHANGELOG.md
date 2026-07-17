@@ -2,6 +2,11 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.7.0 - Phase 3: MTTR/MTBF
+
+### Added
+- `Trigger availability` report gained MTTR (mean time to repair) and MTBF (mean time between failures) columns, computed from the number of problem episodes per trigger in the window (counted via `API::Event()->get()`, same aggregation approach as native "Top 100 triggers") - added to the existing report rather than a separate one, since it's the same trigger scope/data. Shows "N/A" for triggers with zero episodes in the period.
+
 ## 0.6.3 - Fix item/trigger pattern autosuggest not scoped by host
 
 ### Fixed

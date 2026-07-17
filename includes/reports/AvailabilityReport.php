@@ -10,6 +10,8 @@ use Modules\MoreReporting\Includes\ReportType;
  * of the requested time window spent in OK vs PROBLEM state using Zabbix's own
  * calculateAvailability() (include/triggers.inc.php) - the same algorithm behind the
  * classic "Availability report", so results match what the rest of Zabbix would show.
+ * Also computes MTTR (mean time to repair) and MTBF (mean time between failures) from
+ * the number of problem episodes in the window.
  */
 class AvailabilityReport extends ReportType {
 
@@ -29,8 +31,32 @@ class AvailabilityReport extends ReportType {
 			'limit' => self::TRIGGER_LIMIT
 		]);
 
+		$episode_counts = [];
+
+		if ($triggers) {
+			// One problem (TRIGGER_VALUE_TRUE) event marks the start of one episode, so
+			// counting events per trigger gives the episode count without walking the raw
+			// event stream ourselves - same aggregation approach as the native
+			// "Top 100 triggers" report.
+			$counts = API::Event()->get([
+				'countOutput' => true,
+				'groupBy' => ['objectid'],
+				'objectids' => array_column($triggers, 'triggerid'),
+				'source' => EVENT_SOURCE_TRIGGERS,
+				'object' => EVENT_OBJECT_TRIGGER,
+				'value' => TRIGGER_VALUE_TRUE,
+				'time_from' => $filter['time_from'],
+				'time_till' => $filter['time_to']
+			]);
+
+			foreach ($counts as $count) {
+				$episode_counts[$count['objectid']] = (int) $count['rowscount'];
+			}
+		}
+
 		return [
 			'triggers' => $triggers,
+			'episode_counts' => $episode_counts,
 			'time_from' => $filter['time_from'],
 			'time_to' => $filter['time_to']
 		];
@@ -41,6 +67,10 @@ class AvailabilityReport extends ReportType {
 
 		foreach ($data['triggers'] as $trigger) {
 			$availability = calculateAvailability($trigger['triggerid'], $data['time_from'], $data['time_to']);
+			$episodes = $data['episode_counts'][$trigger['triggerid']] ?? 0;
+
+			$downtime_seconds = (int) $availability['true_time'];
+			$uptime_seconds = (int) $availability['false_time'];
 
 			$rows[] = [
 				'triggerid' => $trigger['triggerid'],
@@ -49,7 +79,12 @@ class AvailabilityReport extends ReportType {
 				'priority' => (int) $trigger['priority'],
 				'availability' => $availability['false'],
 				'downtime' => $availability['true'],
-				'downtime_seconds' => (int) $availability['true_time']
+				'downtime_seconds' => $downtime_seconds,
+				'episodes' => $episodes,
+				// Mean time to repair: average duration of a problem episode.
+				'mttr_seconds' => $episodes > 0 ? (int) round($downtime_seconds / $episodes) : null,
+				// Mean time between failures: average uptime stretch between episodes.
+				'mtbf_seconds' => $episodes > 0 ? (int) round($uptime_seconds / $episodes) : null
 			];
 		}
 

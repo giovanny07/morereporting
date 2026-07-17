@@ -161,7 +161,9 @@ if ($data['definition'] !== null) {
 $html_page->addItem($filter);
 
 $table = (new CTableInfo())
-	->setHeader([_('Host'), _('Trigger'), _('Severity'), _('Availability'), _('Downtime')]);
+	->setHeader([
+		_('Host'), _('Trigger'), _('Severity'), _('Availability'), _('Downtime'), _('Episodes'), _('MTTR'), _('MTBF')
+	]);
 
 foreach ($data['rows'] as $row) {
 	$availability_tag = (new CSpan(round($row['availability'], 4).'%'))
@@ -172,7 +174,10 @@ foreach ($data['rows'] as $row) {
 		$row['description'],
 		CSeverityHelper::makeSeverityCell($row['priority']),
 		$availability_tag,
-		convertUnitsS($row['downtime_seconds'], true)
+		convertUnitsS($row['downtime_seconds'], true),
+		$row['episodes'],
+		$row['mttr_seconds'] !== null ? convertUnitsS($row['mttr_seconds'], true) : (new CSpan(_('N/A')))->addClass(ZBX_STYLE_GREY),
+		$row['mtbf_seconds'] !== null ? convertUnitsS($row['mtbf_seconds'], true) : (new CSpan(_('N/A')))->addClass(ZBX_STYLE_GREY)
 	]);
 }
 
