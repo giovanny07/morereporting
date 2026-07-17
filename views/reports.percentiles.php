@@ -38,8 +38,7 @@ $scope_fields = $data['definition'] !== null ? [] : [
 					'popup' => [
 						'filter_preselect' => [
 							'id' => 'filter_groupids_',
-							'submit_as' => 'groupid',
-							'multiple' => true
+							'submit_as' => 'groupid'
 						],
 						'parameters' => [
 							'srctbl' => 'hosts',
@@ -51,8 +50,7 @@ $scope_fields = $data['definition'] !== null ? [] : [
 					'autosuggest' => [
 						'filter_preselect' => [
 							'id' => 'filter_groupids_',
-							'submit_as' => 'groupid',
-							'multiple' => true
+							'submit_as' => 'groupid'
 						]
 					]
 				]))->setWidth(ZBX_TEXTAREA_FILTER_STANDARD_WIDTH)

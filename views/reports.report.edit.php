@@ -74,8 +74,7 @@ $scope_tab = (new CFormGrid())
 				'popup' => [
 					'filter_preselect' => [
 						'id' => 'groupids_',
-						'submit_as' => 'groupid',
-						'multiple' => true
+						'submit_as' => 'groupid'
 					],
 					'parameters' => [
 						'srctbl' => 'hosts',
@@ -87,8 +86,7 @@ $scope_tab = (new CFormGrid())
 				'autosuggest' => [
 					'filter_preselect' => [
 						'id' => 'groupids_',
-						'submit_as' => 'groupid',
-						'multiple' => true
+						'submit_as' => 'groupid'
 					]
 				]
 			]))->setWidth(ZBX_TEXTAREA_STANDARD_WIDTH)

@@ -2,6 +2,11 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.6.2 - Fix "Incorrect value for groupid field"
+
+### Fixed
+- Selecting a host group then trying to pick a host failed with "Incorrect value for \"groupid\" field". Caused by wrongly setting `multiple: true` on the Host groups -> Hosts `filter_preselect` chain: the popup's `groupid` parameter only accepts a single value (`db hstgrp.groupid`, unlike `hostids` which accepts an array), so submitting it as an array failed validation. Removed `multiple` from that specific chain (matches native `trigger.list.php`, which also only preselects the first selected group) - the Hosts -> pattern chain (`hostids`, plural) is unaffected and keeps `multiple: true`.
+
 ## 0.6.1 - Chain scope filters together
 
 ### Fixed
