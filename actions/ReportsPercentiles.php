@@ -13,6 +13,8 @@ use CTimezoneHelper;
 use DateTimeZone;
 
 use Modules\MoreReporting\Includes\NativeGraph;
+use Modules\MoreReporting\Includes\PdfReportHtml;
+use Modules\MoreReporting\Includes\PdfRenderer;
 use Modules\MoreReporting\Includes\ReportComparison;
 use Modules\MoreReporting\Includes\ReportStorage;
 use Modules\MoreReporting\Includes\Reports\ItemPercentilesReport;
@@ -145,10 +147,49 @@ class ReportsPercentiles extends CController {
 		$export_formats = [
 			'morereporting.percentiles.json' => 'json',
 			'morereporting.percentiles.csv' => 'csv',
-			'morereporting.percentiles.yaml' => 'yaml'
+			'morereporting.percentiles.yaml' => 'yaml',
+			'morereporting.percentiles.pdf' => 'pdf'
 		];
 		$export_format = $export_formats[$this->getAction()] ?? null;
 		$is_export = $export_format !== null;
+
+		$export_headers = null;
+		$export_rows = null;
+		$pdf_bytes = null;
+
+		if ($export_format === 'csv' || $export_format === 'pdf') {
+			$export_headers = [
+				_('Host'), _('Item'), _('Count'), _('Min'), _('Avg'), _('Max'), _('P50'), _('P90'), _('P95'), _('P99')
+			];
+			$export_rows = array_map(static function(array $row): array {
+				return [
+					$row['host'],
+					$row['name'],
+					$row['count'],
+					round($row['min'], 4),
+					round($row['avg'], 4),
+					round($row['max'], 4),
+					round($row['p50'], 4),
+					round($row['p90'], 4),
+					round($row['p95'], 4),
+					round($row['p99'], 4)
+				];
+			}, $rows);
+
+			if ($export_format === 'pdf') {
+				$html = PdfReportHtml::build(_('Item percentiles'), $export_headers, $export_rows);
+
+				try {
+					$pdf_bytes = PdfRenderer::render($html);
+				}
+				catch (\RuntimeException $e) {
+					error($e->getMessage());
+					$this->setResponse(new CControllerResponseFatal());
+
+					return;
+				}
+			}
+		}
 
 		$compare_pairs = null;
 
@@ -181,6 +222,9 @@ class ReportsPercentiles extends CController {
 			'hosts' => $hosts,
 			'active_tab' => CProfile::get(self::PROFILE_PREFIX.'active', 1),
 			'rows' => $rows,
+			'export_headers' => $export_headers,
+			'export_rows' => $export_rows,
+			'pdf_bytes' => $pdf_bytes,
 			'compare_pairs' => $compare_pairs,
 			'graph' => $graph,
 			'time_presets' => TimePresets::all(),

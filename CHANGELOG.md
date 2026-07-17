@@ -2,6 +2,18 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.13.0 - Phase 4.5: PDF export
+
+### Added
+- "Export PDF" link next to JSON/CSV/YAML on both report run pages. No native Zabbix PDF pipeline is used (Scheduled reports depends on `zabbix-web-service`, not installed on this deployment) - instead, a small standalone print-ready HTML document (title + table, no Zabbix chrome/nav/CSS, since it's viewed as a downloaded file, not inside the frontend) is generated server-side and converted to PDF by shelling out to `google-chrome-stable --headless --print-to-pdf`.
+- `includes/PdfReportHtml.php`: builds the standalone HTML document from the same `export_headers`/`export_rows` shape already used for CSV, now hoisted out of the CSV view files and into the controllers so both formats share one source of formatted data instead of duplicating the humanization logic (severity name, `convertUnitsS()`, "N/A" defaults).
+- `includes/PdfRenderer.php`: runs Chrome as a subprocess against a temp HTML file and returns the resulting PDF bytes. Sets `HOME` to a writable temp dir for the subprocess - confirmed by direct testing that Apache's real `$HOME` (`/usr/share/httpd`) isn't writable, which Chrome needs even with an explicit `--user-data-dir`. Runs under `timeout 30` and a disposable `--user-data-dir` per render (cleaned up after, along with the temp HTML/PDF files).
+- `views/layout.download.pdf.php`: same idea as the JSON/YAML download layouts, with `Content-Type: application/pdf`. PHP's output buffering (which `CView` uses to capture `main_block`) is binary-safe, so the raw PDF bytes pass through the same view->layout pipeline as the text-based exports without any special-casing.
+- `scripts/http_smoke.sh` gained a matching PDF export check (Content-Type, Content-Disposition, `%PDF` magic-byte check on the body) - verified against the real HTTP stack, not just a direct Chrome invocation.
+
+### Fixed/Verified
+- On generation failure (e.g. Chrome missing/crashes/times out on another deployment), the controller catches the exception and responds with `CControllerResponseFatal` instead of downloading an empty or broken file.
+
 ## 0.12.0 - Phase 4.3: YAML export
 
 ### Added

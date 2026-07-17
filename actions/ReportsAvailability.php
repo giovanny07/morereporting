@@ -9,9 +9,12 @@ use CControllerResponseData;
 use CControllerResponseFatal;
 use CProfile;
 use CRangeTimeParser;
+use CSeverityHelper;
 use CTimezoneHelper;
 use DateTimeZone;
 
+use Modules\MoreReporting\Includes\PdfReportHtml;
+use Modules\MoreReporting\Includes\PdfRenderer;
 use Modules\MoreReporting\Includes\ReportComparison;
 use Modules\MoreReporting\Includes\ReportStorage;
 use Modules\MoreReporting\Includes\Reports\AvailabilityReport;
@@ -149,10 +152,48 @@ class ReportsAvailability extends CController {
 		$export_formats = [
 			'morereporting.availability.json' => 'json',
 			'morereporting.availability.csv' => 'csv',
-			'morereporting.availability.yaml' => 'yaml'
+			'morereporting.availability.yaml' => 'yaml',
+			'morereporting.availability.pdf' => 'pdf'
 		];
 		$export_format = $export_formats[$this->getAction()] ?? null;
 		$is_export = $export_format !== null;
+
+		$export_headers = null;
+		$export_rows = null;
+		$pdf_bytes = null;
+
+		if ($export_format === 'csv' || $export_format === 'pdf') {
+			$export_headers = [
+				_('Host'), _('Trigger'), _('Severity'), _('Availability %'), _('Downtime'), _('Episodes'), _('MTTR'),
+				_('MTBF')
+			];
+			$export_rows = array_map(static function(array $row): array {
+				return [
+					$row['host'],
+					$row['description'],
+					CSeverityHelper::getName($row['priority']),
+					round($row['availability'], 4),
+					convertUnitsS($row['downtime_seconds'], true),
+					$row['episodes'],
+					$row['mttr_seconds'] !== null ? convertUnitsS($row['mttr_seconds'], true) : _('N/A'),
+					$row['mtbf_seconds'] !== null ? convertUnitsS($row['mtbf_seconds'], true) : _('N/A')
+				];
+			}, $rows);
+
+			if ($export_format === 'pdf') {
+				$html = PdfReportHtml::build(_('Trigger availability'), $export_headers, $export_rows);
+
+				try {
+					$pdf_bytes = PdfRenderer::render($html);
+				}
+				catch (\RuntimeException $e) {
+					error($e->getMessage());
+					$this->setResponse(new CControllerResponseFatal());
+
+					return;
+				}
+			}
+		}
 
 		$compare_pairs = null;
 
@@ -179,6 +220,9 @@ class ReportsAvailability extends CController {
 			'active_tab' => CProfile::get(self::PROFILE_PREFIX.'active', 1),
 			'slo' => (float) $filter['slo'],
 			'rows' => $rows,
+			'export_headers' => $export_headers,
+			'export_rows' => $export_rows,
+			'pdf_bytes' => $pdf_bytes,
 			'compare_pairs' => $compare_pairs,
 			'time_presets' => TimePresets::all(),
 			'definition' => $definition !== null
