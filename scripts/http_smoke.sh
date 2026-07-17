@@ -85,6 +85,54 @@ check_action() {
 	rm -f "$body"
 }
 
+# Verifies a file-download export action: HTTP 200, the right Content-Type, a
+# Content-Disposition: attachment header (proves the download layout is wired, not just
+# the default HTML one), and a parseable JSON array body with at least one row.
+check_json_export() {
+	local action="$1"
+	local body headers status
+
+	body="$(mktemp)"
+	headers="$(mktemp)"
+
+	status=$(curl -s -D "$headers" -o "$body" -w '%{http_code}' -b "$COOKIE_JAR" \
+		"$ZABBIX_URL/zabbix.php?action=$action&filter_date_from=now-30d&filter_date_to=now")
+
+	if [[ "$status" != "200" ]]; then
+		echo "FAIL $action: HTTP $status"
+		fail_count=$((fail_count + 1))
+		rm -f "$body" "$headers"
+		return
+	fi
+
+	if ! grep -qi 'content-type: application/json' "$headers"; then
+		echo "FAIL $action: missing/wrong Content-Type header"
+		fail_count=$((fail_count + 1))
+		rm -f "$body" "$headers"
+		return
+	fi
+
+	if ! grep -qi 'content-disposition: attachment' "$headers"; then
+		echo "FAIL $action: missing Content-Disposition: attachment header (not downloading as a file)"
+		fail_count=$((fail_count + 1))
+		rm -f "$body" "$headers"
+		return
+	fi
+
+	local row_count
+	row_count=$(python3 -c "import json; d=json.load(open('$body')); print(len(d) if isinstance(d, list) else -1)" 2>/dev/null || echo "-1")
+
+	if [[ "$row_count" == "-1" ]]; then
+		echo "FAIL $action: response body is not a valid JSON array"
+		fail_count=$((fail_count + 1))
+		rm -f "$body" "$headers"
+		return
+	fi
+
+	echo "OK $action ($row_count rows, valid JSON, attachment headers correct)"
+	rm -f "$body" "$headers"
+}
+
 # Row count in a popup.generic response body, or -1 on a validation/PHP error.
 popup_rows() {
 	local body
@@ -174,6 +222,8 @@ check_action "morereporting.list"
 check_action "morereporting.percentiles"
 check_action "morereporting.availability"
 check_action "morereporting.report.edit"
+check_json_export "morereporting.percentiles.json"
+check_json_export "morereporting.availability.json"
 
 # Host groups -> Hosts (popup.generic, submit_as: groupid, no "multiple" - see 0.6.2).
 # Not host_preselect_required, so it shows everything unscoped and narrows once scoped.

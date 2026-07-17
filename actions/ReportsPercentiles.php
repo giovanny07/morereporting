@@ -142,9 +142,11 @@ class ReportsPercentiles extends CController {
 
 		$rows = $report->render($report->compute($raw_data), 'interactive');
 
+		$is_export = $this->getAction() === 'morereporting.percentiles.json';
+
 		$compare_pairs = null;
 
-		if ($filter['compare']) {
+		if ($filter['compare'] && !$is_export) {
 			$previous_period = ReportComparison::previousPeriod($time_from, $time_to);
 
 			$previous_raw_data = $report->getData([
@@ -162,7 +164,7 @@ class ReportsPercentiles extends CController {
 
 		$graph = null;
 
-		if ($rows) {
+		if ($rows && !$is_export) {
 			$top_itemids = array_slice(array_column($rows, 'itemid'), 0, 3);
 			$graph = NativeGraph::renderItems($top_itemids, $time_from, $time_to, 95);
 		}
@@ -183,6 +185,11 @@ class ReportsPercentiles extends CController {
 
 		$response = new CControllerResponseData($data);
 		$response->setTitle(_('Item percentiles'));
+
+		if ($is_export) {
+			$response->setFileName('morereporting_percentiles_'.date('Ymd_His').'.json');
+		}
+
 		$this->setResponse($response);
 	}
 }

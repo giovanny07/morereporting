@@ -2,6 +2,16 @@
 
 All notable changes to this module are documented here. Versions follow the `version` field in `manifest.json` (semver: MINOR per new report/feature, PATCH per fix, MAJOR reserved for a stable 1.0.0).
 
+## 0.9.0 - Phase 4.1: JSON export
+
+### Added
+- "Export JSON" link on both report run pages, carrying over the current filter (scope, patterns, period, saved reportid if any). Downloads the same rows the interactive view computed, as a `.json` file (`Content-Disposition: attachment`).
+- Reuses the existing `ReportsPercentiles`/`ReportsAvailability` controllers for the export actions (`morereporting.percentiles.json`, `morereporting.availability.json`) rather than duplicating the filter/scope logic - same pattern core uses for `actionlog.list` vs `actionlog.csv` (one controller, two action registrations pointing at different view+layout). Skips the SVG graph and period comparison work for export requests, since neither is used in the JSON output.
+- `views/layout.download.json.php`: small module-owned layout (`Content-Type: application/json` + `Content-Disposition: attachment`) - core's own `layout.json` is meant for inline AJAX/RPC responses and doesn't set the download header.
+
+### Fixed
+- View/layout names can only contain lowercase letters and dots (`CView`'s name regex rejects hyphens) - `layout.download-json` failed with "Invalid view name" until renamed to `layout.download.json`.
+
 ## 0.8.0 - Phase 3: generic period-over-period comparison
 
 ### Added
